@@ -1,115 +1,117 @@
-# Qloo Agentic Hackathon ("Agents, but with taste")
+# Who Would Love
 
-- URL: https://qloo.devpost.com/ (reglas: https://qloo.devpost.com/rules)
-- Envíos abiertos desde: 2026-09-30 09:00 ET
-- Cierre: **2026-10-30 23:45 EDT** = 2026-10-31 03:45 UTC (04:45 en España, 05:45 en Grecia)
-- Juicio: 2026-11-02 a 2026-11-16. Ganadores: hacia el 2026-11-23.
-- Bote: 25.000 USD (1.º 15.000, 2.º 6.000, 3.º 4.000). 566 inscritos a 2026-10-06.
-- Elegibilidad: mayoría de edad; excluidos Brasil, Quebec, Rusia, Crimea, Cuba, Irán, Corea del
-  Norte y países con sanciones OFAC. España/Grecia OK. Individuos, equipos u organizaciones.
-- Se puede presentar más de un proyecto si son sustancialmente distintos.
-- Proyecto previo permitido **solo si** se le integra Qloo durante el periodo de envío y se
-  explica qué se actualizó.
+**Paste a link and discover who would love your app, product, service or game.**
 
-## De qué va
-Agentes con "gusto cultural": usar la API y el taste graph de Qloo (250M+ entidades: música,
-cine/TV, restaurantes, moda, viajes...) para que el agente recomiende mejor que un LLM pelado.
-Vale (a) herramienta agéntica, (b) app hecha con framework de agentes, o (c) meter Qloo en un
-agente que ya existe. **Si funciona igual sin Qloo, está mal planteado.**
+Who Would Love reads a product page (or a whole website), matches it against real cultural taste
+data from [Qloo](https://www.qloo.com/), and emails back an audience report: who the audience is,
+what else they love, where they live, and the communities where you can actually reach them, with
+ad targeting ready to paste into Meta Ads and Reddit Ads.
 
-API key: https://docs.qloo.com/reference/qloo-llm-hackathon-developer-guide#getting-your-api-key
-(guardarla en SSM como `/servikaki/secrets/qloo.env`, nunca en el repo).
+Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/) (deadline 2026-10-30, 23:45 EDT).
 
-## Entrega obligatoria
-1. Demo **funcional y alojada fuera** (web pública, APK o TestFlight). Nada solo en local.
-2. Repo público (GitHub/GitLab/Bitbucket) con todo el código e instrucciones.
-3. Descripción en texto: qué hace el agente y qué lo hace "Qloo-powered".
-4. Licencia open source visible en el About del repo (ponerla el primer día).
-5. **No piden vídeo.**
+> Status (2026-10-08): design mockups only. The real pipeline starts once the Qloo hackathon API
+> key arrives.
 
-## Juicio
-Implementación técnica (uso no trivial de Qloo), diseño (producto completo), impacto
-(problema real para público concreto), calidad de la idea (uso no obvio de Qloo).
-Jurado: Jason Calacanis, CTO de Qloo, Nicole Seligman (board de OpenAI), Todd Boehly,
-Cedric the Entertainer, Michael Abrams (Live Nation).
+## How it works
 
-## Encaje con el resto
-- Cierra el mismo día que el 07 (Nebius, 2026-10-30) y una semana después del 08.
-- Reutilizable: el núcleo agéntico común (adaptador fino `adapters/qloo.py` o tool de Qloo
-  dentro del agente existente). Candidato natural: Newsletter for One (meter Qloo para el
-  gusto del lector) o cualquier agente ya hecho, vía opción (c).
+1. **Read the product.** An AI agent fetches the page with Firecrawl (renders JavaScript, maps the
+   site for "whole website" mode, returns clean markdown) and Claude Haiku 5.5 works out what the
+   product is, its tone and who it seems built for.
+2. **Ask the taste graph.** The agent turns that into Qloo entities and tags, then asks Qloo for
+   affinities (what else these people love), demographics and where the taste is popular.
+3. **Find the doors.** The agent searches the open web for the communities where those people
+   gather (subreddits, newsletters, podcasts) and builds ready-to-paste ad targeting.
+4. **Report.** An HTML/PDF report is emailed to the user. No signup and no payment step.
 
-## Pendiente
-- Pedir API key y probar qué endpoints da (Insights, entidades, tags, audiencias).
-- Decidir idea.
+Every claim in the report carries one of three labels, and the report can be filtered by them:
 
-## Notas técnicas de la API (guía del hackathon, leída 2026-10-08)
-- Pedir key con el formulario https://forms.gle/zz12orkLHTAneLGz6 (tarda unos días hábiles, mirar spam).
-- Base URL **solo** `https://hackathon.api.qloo.com` (api.qloo.com da 401). Header `X-Api-Key`.
-- Flujo: `/search` (nombre a ID de entidad) o `/v2/tags` (ID de tag) y luego `GET /v2/insights`
-  con `filter.type` + `signal.interests.entities` / `signal.interests.tags` /
-  `signal.demographics.audiences` / filtros de lugar.
-- Tipos: artist, book, brand, destination, movie, person, place, podcast, tv_show, video_game.
-- Nada de `/recs` ni `/recommendations` (legacy). Parámetros inválidos se ignoran en silencio
-  (resultado vacío sin error).
-- Cachear en servidor vale; **no** subir respuestas de Qloo al repo público.
-- Soporte: Discord #api-help (https://discord.gg/rF9PKsD5Q7).
+| Label | Meaning |
+| --- | --- |
+| Qloo data | Measured affinities, demographics and places from Qloo. They describe groups, never individuals. |
+| Web research | Communities and channels found on the open web, with links. |
+| Our interpretation | Our advice based on the above. |
 
-## Hackathon anterior (Qloo LLM Hackathon, 2025, 344 proyectos)
-Galería: https://qloo-hackathon.devpost.com/project-gallery. Arriba del todo: GeoTaste (consultor
-de negocio por ubicación), Resonance AI (mensajes de campaña política adaptados a la cultura
-local), Zesty (anti-recomendador que te saca de tu burbuja), Alloy (compatibilidad cultural
-para fusiones de empresas). Saturado: viajes, pelis por estado de ánimo, "tu ADN cultural".
+## Mockups
 
-## Precio de Qloo (2026-10-08)
-Sin precio público: venta a empresas ("contact sales"). Capterra da "desde 1.390 USD por usuario
-y mes". La key del hackathon es gratis y **se desactiva al acabar el juicio (2026-11-16)**: nada
-que dependa de Qloo sigue funcionando después sin un contrato.
+- `mockups/home.html`: landing page with the three-step form.
+- `mockups/report-sample.html`: sample report for [Momentline](https://apps.apple.com/app/momentline-day-counter/id6811362832), with the source filter. **All numbers are illustrative**, not real Qloo results.
+- `mockups/logo-options.png`: logo variants (the third one is in use).
+- `mockups/assets/`: Momentline icon and App Store screenshots used as the worked example.
 
-## Ideas en discusión (2026-10-08)
-1. GiftyQuest (del 08) + Qloo: ideas de regalo basadas en gustos reales (marcas, libros,
-   restaurantes, destinos) en vez de productos inventados.
-2. Buscador de audiencias: pegas la URL de tu producto, la IA lo entiende, lo cruza con Qloo y
-   devuelve a quién apuntar y dónde (intereses para Facebook Ads, etc.).
+Open the HTML files directly in a browser; they have no build step.
 
-## Kit oficial (https://github.com/qloo/qloo-hackathon-kit), leído 2026-10-08
-- Harness `@qloo/qloo-harness` 0.1.26 instalado global (Node 22.20). `QLOO_BASE_URL` y
-  `QLOO_TRUSTED_BASE_URL` apuntando al hackathon añadidos a `~/.zshrc`.
-- Tres vías: `qloo exec <workflow>` (JSON, sin modelo), `qloo api` (respuesta cruda) y
-  `qloo mcp` (servidor MCP por stdio para que nuestro modelo llame a Qloo como herramientas).
-- 9 workflows: recommend, rank, describe, where_popular, compare_audiences, entity_tags,
-  audience_demographics, trends, find_tags. Respuesta con `status` ok / empty / needs_input /
-  partial / degraded / error.
-- En servidor la key va en la variable `QLOO_API_KEY` (la sacamos de SSM, no `qloo setup` en disco).
-- **No vale serverless:** el MCP se arranca como proceso, así que hace falta VM o contenedor.
-- Prohibido mandar a Qloo datos personales (emails, nombres, IDs). Los resultados describen
-  grupos, no personas: el informe tiene que separar "dato de Qloo" de "nuestra interpretación".
-- docs/SUBMISSION.md pide además: problema, qué workflows y por qué, un ejemplo
-  petición-resultado, capturas sin datos personales, pasos para montarlo desde cero y
-  limitaciones conocidas.
+## Planned stack
 
-## Idea elegida (2026-10-08): informe de audiencia a partir de una URL
-URL del producto + email → pago → agente (LLM) lee la página, la traduce a entidades y tags de
-Qloo, pide a Qloo afinidades, demografía y dónde es popular, busca comunidades reales donde está
-esa gente (Reddit, Facebook, podcasts, newsletters) → informe PDF por email.
+- **Hosting:** Cloudflare Workers, with Workflows or Queues for the background job (a report takes
+  a few minutes). Workers cannot spawn the `qloo mcp` process from the official kit, so Qloo is
+  called through its REST API, wrapped as tools the agent can call.
+- **Model:** Claude Haiku 5.5 through the Anthropic API.
+- **Page reading:** Firecrawl.
+- **Email:** to be decided (Amazon SES or Resend).
 
-## Decisiones 2026-10-08
-- **Sin pago** en la demo (frena la prueba del jurado). Flujo: URL + alcance (esta página / web
-  entera, se autodetecta por la ruta) + email → informe.
-- Nombre provisional **Who Would Love** (whowouldlove.com libre el 2026-10-08, sin comprar).
-- Bocetos: `mockups/home.html` y `mockups/report-sample.html` (datos inventados, marcados).
-- Lectura de la web: **Firecrawl** (renderiza JS, mapa del sitio, markdown limpio) + **Claude
-  Haiku 5.5** (salió el 2026-10-07; confirmar el ID exacto con la API de modelos) para entenderla.
-- Secretos: **SSM `/servikaki/secrets/whowouldlove.env`** con `ANTHROPIC_API_KEY` (key y workspace
-  propios del proyecto) y `FIRECRAWL_API_KEY`. Se suben con `scripts/put_secrets.py` (pide las
-  keys ocultas, no escribe nada a disco). Nada de `.env` en la carpeta.
-- Logo: corazón cuya mitad derecha es un "?" grueso en naranja, con el punto debajo
-  (variantes en `mockups/logo-options.png`, elegida la tercera).
-- Hosting previsto: Cloudflare Workers. Los Workers no pueden arrancar `qloo mcp` (es un
-  proceso), así que Qloo se llama por su API REST directa desde el Worker, envuelta como
-  herramientas del agente. Alternativa si hace falta el harness: Cloudflare Containers.
-- 2026-10-08 (v3 de bocetos): estilo nuevo (Bricolage Grotesque + Geist, bloque oscuro con
-  degradado animado), logo grande dibujándose de fondo, palabra rotatoria letra a letra, formulario
-  en 3 pasos verticales con botón al final, "How it works" con visuales usando **Momentline** como
-  ejemplo real (icono y capturas en `mockups/assets/`, sacados de su ficha de App Store), informe
-  de ejemplo de Momentline con filtro por fuente (Qloo / web / nuestra interpretación).
+## Secrets
+
+No `.env` files in this repository. Keys live in AWS SSM Parameter Store under
+`/servikaki/secrets/whowouldlove.env` (`ANTHROPIC_API_KEY`, `FIRECRAWL_API_KEY`) and are read at
+runtime.
+
+## To do
+
+- [ ] **Upload the Anthropic and Firecrawl keys to SSM.** Run
+      `/Users/javi/PythonEnv/bin/python scripts/put_secrets.py`. It asks for each key with hidden
+      input and writes nothing to disk. Leave the Firecrawl key empty to reuse the existing one.
+- [ ] Wait for the Qloo hackathon API key (requested 2026-10-08), then add `QLOO_API_KEY` to the
+      same SSM parameter.
+- [ ] Confirm the exact Haiku 5.5 model ID with the Models API.
+- [ ] Build real page reading (Firecrawl + Haiku 5.5) and test it on Momentline.
+- [ ] Connect Qloo and replace the sample report with a real one.
+- [ ] Community search, report rendering, email delivery, Cloudflare deployment.
+- [ ] Before making the repo public: check history for secrets with
+      `git log -p | grep -iE 'api[_-]?key|secret|token'`.
+
+## Qloo API notes
+
+From the [hackathon developer guide](https://docs.qloo.com/reference/qloo-llm-hackathon-developer-guide)
+and the [official kit](https://github.com/qloo/qloo-hackathon-kit), read 2026-10-08:
+
+- Hackathon keys only work against `https://hackathon.api.qloo.com` (production returns 401).
+  Send the key in the `X-Api-Key` header.
+- Flow: `/search` (name to entity ID) or `/v2/tags` (tag ID), then `GET /v2/insights` with
+  `filter.type` plus signals such as `signal.interests.entities`, `signal.interests.tags` or
+  `signal.demographics.audiences`.
+- Entity types: artist, book, brand, destination, movie, person, place, podcast, tv_show,
+  video_game.
+- Do not use the legacy `/recs` or `/recommendations` endpoints. Invalid parameters are ignored
+  silently (empty result, no error).
+- Server-side caching is allowed; never commit Qloo responses to a public repository.
+- Never send personal data (emails, names, device IDs) to Qloo. The user's email stays on our side.
+- The key is deactivated after judging ends (2026-11-16).
+- Support: Qloo hackathon Discord, `#api-help`.
+
+## Hackathon facts
+
+- Submissions 2026-09-30 to 2026-10-30 23:45 EDT. Judging 2026-11-02 to 2026-11-16, winners around
+  2026-11-23.
+- Prizes: 15,000 / 6,000 / 4,000 USD.
+- Criteria: technological implementation (non-trivial use of Qloo), design (a complete product),
+  potential impact (a real problem for a real audience), quality of the idea (non-obvious use of
+  Qloo). "If your submission would work the same without Qloo, you're building the wrong thing."
+- Qloo has no public pricing (enterprise sales), so anything built on Qloo needs a commercial
+  agreement after the hackathon.
+
+## Submission checklist
+
+From the hackathon rules and the kit's `docs/SUBMISSION.md`:
+
+- A live demo hosted externally that judges can use end to end.
+- A public repository with all source code and setup instructions.
+- A text description of what the agent does and what makes it Qloo-powered.
+- An open-source license visible in the repository's About section (MIT, already in place).
+- Which Qloo workflows are used and why, a redacted request-to-result example, screenshots with no
+  credentials or personal data, and known limitations.
+
+No video is required.
+
+## License
+
+[MIT](LICENSE)
