@@ -9,13 +9,12 @@ ad targeting ready to paste into Meta Ads and Reddit Ads.
 
 Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/) (deadline 2026-10-30, 23:45 EDT).
 
-> Status (2026-10-08): design mockups only. The real pipeline starts once the Qloo hackathon API
-> key arrives.
+> Status (2026-10-11): design mockups done; all API keys verified. Building the real pipeline.
 
 ## How it works
 
 1. **Read the product.** An AI agent fetches the page with Firecrawl (renders JavaScript, maps the
-   site for "whole website" mode, returns clean markdown) and Claude Haiku 5.5 works out what the
+   site for "whole website" mode, returns clean markdown) and Claude Opus 5.5 works out what the
    product is, its tone and who it seems built for.
 2. **Ask the taste graph.** The agent turns that into Qloo entities and tags, then asks Qloo for
    affinities (what else these people love), demographics and where the taste is popular.
@@ -45,25 +44,27 @@ Open the HTML files directly in a browser; they have no build step.
 - **Hosting:** Cloudflare Workers, with Workflows or Queues for the background job (a report takes
   a few minutes). Workers cannot spawn the `qloo mcp` process from the official kit, so Qloo is
   called through its REST API, wrapped as tools the agent can call.
-- **Model:** Claude Haiku 5.5 through the Anthropic API.
+- **Model:** Claude Opus 5.5 (`claude-opus-5-5`) through the Anthropic API. Note: forced
+  `tool_choice` returns 400 on this model, and thinking cannot be disabled (use `effort`).
 - **Page reading:** Firecrawl.
 - **Email:** to be decided (Amazon SES or Resend).
 
 ## Secrets
 
-No `.env` files in this repository. Keys live in AWS SSM Parameter Store under
-`/servikaki/secrets/whowouldlove.env` (`ANTHROPIC_API_KEY`, `FIRECRAWL_API_KEY`) and are read at
-runtime.
+No `.env` files in this repository. Keys live in AWS SSM Parameter Store and are read at runtime:
+
+- `/servikaki/secrets/whowouldlove.env`: `ANTHROPIC_API_KEY`
+- `/servikaki/secrets/firecrawl.env`: `FIRECRAWL_API_KEY` (1,000 credits a month, so "whole website"
+  mode must cap the number of pages)
+- `/servikaki/secrets/qloo.env`: `QLOO_API_URL`, `QLOO_API_KEY`
+
+The `qloo` CLI reads `QLOO_API_KEY` from the environment, so `qloo setup --qloo` is not needed.
 
 ## To do
 
-- [ ] **Upload the Anthropic and Firecrawl keys to SSM.** Run
-      `/Users/javi/PythonEnv/bin/python scripts/put_secrets.py`. It asks for each key with hidden
-      input and writes nothing to disk. Leave the Firecrawl key empty to reuse the existing one.
-- [ ] Wait for the Qloo hackathon API key (requested 2026-10-08), then add `QLOO_API_KEY` to the
-      same SSM parameter.
-- [ ] Confirm the exact Haiku 5.5 model ID with the Models API.
-- [ ] Build real page reading (Firecrawl + Haiku 5.5) and test it on Momentline.
+- [x] Upload the API keys to SSM and verify them (2026-10-11).
+- [x] First Qloo harness test: `qloo setup --status` reports "Qloo data: ready", `find_tags` works.
+- [ ] Build real page reading (Firecrawl + Opus 5.5) and test it on Momentline.
 - [ ] Connect Qloo and replace the sample report with a real one.
 - [ ] Community search, report rendering, email delivery, Cloudflare deployment.
 - [ ] Before making the repo public: check history for secrets with
@@ -87,6 +88,12 @@ and the [official kit](https://github.com/qloo/qloo-hackathon-kit), read 2026-10
 - Never send personal data (emails, names, device IDs) to Qloo. The user's email stays on our side.
 - The key is deactivated after judging ends (2026-11-16).
 - Support: Qloo hackathon Discord, `#api-help`.
+- Findings from our own tests (2026-10-11):
+  - A single generic tag as the only signal returns noise (every result gets the same affinity).
+    Concrete entity signals (books, brands, apps) return ranked, coherent results.
+  - `/search` is fuzzy: "Bullet Journal" can resolve to "The Wall Street Journal". The agent must
+    check every match before using it as a signal.
+  - `filter.type=urn:demographics` returns age and gender skews relative to the average.
 
 ## Hackathon facts
 
