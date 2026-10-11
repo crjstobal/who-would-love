@@ -12,6 +12,8 @@ import { readProduct, type ProductProfile } from "../src/read-product.js";
 import { Qloo } from "../src/qloo.js";
 import { gatherTaste, resolveSeeds, type TasteData } from "../src/taste.js";
 import { findCommunities, type Community } from "../src/communities.js";
+import { writeReport, type ReportSpec } from "../src/write-report.js";
+import { renderReport } from "../src/render.js";
 
 function ssmEnv(name: string): Record<string, string> {
   const raw = execFileSync("aws", [
@@ -89,4 +91,13 @@ const communities = await step<Community[]>(`${dir}/03-communities.json`, "3. Co
 });
 for (const c of communities) console.log(`    ${c.link_ok ? "ok " : "BAD"} [${c.segment}] ${c.platform} ${c.name} ${c.size ?? ""} ${c.url}`);
 
-console.log(`\nSpent this run: about $${spent.toFixed(2)}. Saved to ${dir}`);
+
+const spec = await step<ReportSpec>(`${dir}/04-spec.json`, "4. Write report (Opus)", async () => {
+  const r = await writeReport(profile, taste, communities, claude);
+  console.log(`    ${charge(r.usage)}`);
+  return r.spec;
+});
+const date = new Date().toISOString().slice(0, 10);
+const id = "WWL-" + dir.split("-").pop()!.slice(-6);
+writeFileSync(`${dir}/report.html`, renderReport({ page, profile, taste, communities, spec, date, id }));
+console.log(`5. Rendered ${dir}/report.html. Spent this run: about $${spent.toFixed(2)}`);

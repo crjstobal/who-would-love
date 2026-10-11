@@ -6,6 +6,7 @@ export interface ScrapedPage {
   title: string;
   description: string;
   markdown: string;
+  image?: string;
 }
 
 export async function scrapePage(url: string, apiKey: string): Promise<ScrapedPage> {
@@ -25,5 +26,6 @@ export async function scrapePage(url: string, apiKey: string): Promise<ScrapedPa
     title: String(first(meta.title)),
     description: String(first(meta.description)),
     markdown: body.data.markdown ?? "",
+    image: String(first(meta.ogImage ?? meta["og:image"] ?? "")) || undefined,
   };
 }
