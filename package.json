@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "read": "tsx scripts/run-local.ts"
+    "report": "tsx scripts/run-local.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",

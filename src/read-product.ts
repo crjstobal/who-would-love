@@ -24,15 +24,16 @@ export const ProductProfile = z.object({
   tone: z.string().describe("Voice and visual mood of the page, in a few words."),
   page_language: z.string(),
   use_cases: z.array(z.string()).describe("Concrete situations where someone would reach for this product."),
-  apparent_audience: z.array(z.object({
-    segment: z.string(),
+  segments: z.array(z.object({
+    name: z.string().describe("Short, vivid name for this audience, e.g. 'Sentimental date keepers'."),
+    description: z.string().describe("One or two sentences: who they are and why the product fits them."),
     evidence: z.string().describe("Short quote or fact from the page that supports this segment."),
-  })),
-  qloo_seed_entities: z.array(z.object({
-    name: z.string().describe("Exact, canonical, well-known name, as it would appear in a catalogue."),
-    type: z.enum(QLOO_ENTITY_TYPES),
-    why: z.string().describe("Why people who love this would plausibly love the product."),
-  })).describe("6 to 10 entities that represent the taste of the likely audience."),
+    seeds: z.array(z.object({
+      name: z.string().describe("Exact, canonical, well-known name, as it would appear in a catalogue."),
+      type: z.enum(QLOO_ENTITY_TYPES),
+      why: z.string().describe("Why people in this segment would plausibly love this."),
+    })).describe("3 to 5 entities that capture this segment's taste."),
+  })).describe("3 or 4 distinct audiences, most important first."),
   qloo_tag_queries: z.array(z.string()).describe("3 to 6 short themes or keywords, e.g. 'journaling', 'long distance relationship'."),
   open_questions: z.array(z.string()).describe("What the page does not make clear."),
 });
@@ -42,10 +43,13 @@ const SYSTEM = `You are the first step of Who Would Love, a tool that tells make
 
 You receive the text of one product page. Describe the product faithfully, using only what the page says or clearly implies. Do not invent features, prices or claims.
 
-Then propose seeds for Qloo, a cultural taste graph. Qloo knows entities of these types: ${QLOO_ENTITY_TYPES.join(", ")}. It does not know apps, so a comparable app goes in as its company or brand (for example "Notion" as a brand). Good seeds are:
+Then split the likely audience into 3 or 4 distinct segments. Each one should be a different reason to love the product (not the same people described twice), and each must be supported by something on the page.
+
+For each segment, propose seeds for Qloo, a cultural taste graph. Qloo knows entities of these types: ${QLOO_ENTITY_TYPES.join(", ")}. It does not know apps, so a comparable app goes in as its company or brand (for example "Notion" as a brand). Good seeds are:
 - famous and unambiguous, so a catalogue search finds the right one (prefer "Day One" style exact names only if they are widely known; otherwise choose a better-known neighbour);
 - specific to this audience's taste, not generic giants that everyone likes (avoid Google, Apple, Netflix, Coca-Cola);
-- varied in type (mix brands with books, shows, podcasts, artists or places when the page supports it).
+- varied in type (mix brands with books, shows, podcasts, artists or people);
+- different from the seeds of the other segments, so each segment pulls Qloo in its own direction.
 Each seed needs a reason tied to the page. Seeds describe tastes of a group, never a specific private person.`;
 
 export async function readProduct(page: ScrapedPage, client: Anthropic): Promise<{ profile: ProductProfile; usage: Anthropic.Usage }> {

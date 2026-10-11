@@ -1,7 +1,8 @@
-// Step 2 of the pipeline: turn the product profile into Qloo taste data.
-// 1. Look up each proposed seed in Qloo and let the model confirm the right match (or reject it).
-// 2. Use the confirmed entities as signals to ask Qloo what else this audience loves,
-//    how it skews by age and gender, and where in a market the taste is strongest.
+// Step 2 of the pipeline: turn the product profile into Qloo taste data, one audience segment at a time.
+// 1. Look up every proposed seed in Qloo and let the model confirm the right match (or reject it).
+// 2. For each segment, use its confirmed seeds as signals and ask Qloo what else that audience loves
+//    (a mainstream band and a niche band), how it skews by age and gender, and where it is strongest.
+// 3. Do the same "where" and "who" questions for the whole audience across the likely markets.
 
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
@@ -9,33 +10,45 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { MODEL, type ProductProfile } from "./read-product.js";
 import type { Qloo } from "./qloo.js";
 
-const AFFINITY_TYPES = ["brand", "book", "movie", "tv_show", "podcast", "artist", "person", "destination"] as const; // video_game is not accepted by insights here
+// video_game is not accepted by /v2/insights in the hackathon environment.
+const AFFINITY_TYPES = ["brand", "book", "movie", "tv_show", "podcast", "artist", "person", "destination"] as const;
+// Popularity band for the niche list: high enough to be real, low enough to skip household names.
+const NICHE = { min: 0.3, max: 0.9 };
 
 interface Candidate { id: string; name: string; description: string; year?: number; popularity: number; tags: string[] }
 
-export interface ConfirmedSeed { seed: string; type: string; entity_id: string; qloo_name: string; why: string }
-export interface Affinity { name: string; entity_id: string; affinity: number; description: string }
+export interface ConfirmedSeed { name: string; type: string; entity_id: string; qloo_name: string; why: string }
+export interface RejectedSeed { name: string; type: string; reason: string }
+export interface Affinity { name: string; entity_id: string; affinity: number; popularity: number; description: string }
 export interface Place { label: string; latitude: number; longitude: number; affinity: number }
+export interface Demographics { age: Record<string, number>; gender: Record<string, number> }
+
+export interface SegmentTaste {
+  name: string;
+  description: string;
+  evidence: string;
+  seeds: ConfirmedSeed[];
+  rejected: RejectedSeed[];
+  affinities: Record<string, { mainstream: Affinity[]; niche: Affinity[]; in_market: Affinity[] }>;
+  weak: string[];
+  demographics: Demographics | null;
+  places: Place[];
+}
 
 export interface TasteData {
-  seeds: { confirmed: ConfirmedSeed[]; rejected: { seed: string; type: string; reason: string }[] };
+  markets: string[];
   tags: { query: string; tag_id: string; name: string }[];
-  affinities: Record<string, Affinity[]>;
-  weak_types: string[];
-  demographics: { age: Record<string, number>; gender: Record<string, number> } | null;
-  places: Record<string, Place[]>;
+  segments: SegmentTaste[];
+  overall: { demographics: Demographics | null; places: Record<string, Place[]> };
 }
 
 const Verdict = z.object({
   entities: z.array(z.object({
-    seed: z.string(),
+    key: z.string().describe("The key of the seed, copied exactly."),
     entity_id: z.string().nullable().describe("The id of the matching candidate, or null if none is the intended thing."),
     reason: z.string(),
   })),
-  tags: z.array(z.object({
-    query: z.string(),
-    tag_id: z.string().nullable(),
-  })),
+  tags: z.array(z.object({ query: z.string(), tag_id: z.string().nullable() })),
   markets: z.array(z.string()).describe("1 to 3 countries where this product most plausibly sells, by English country name."),
 });
 
@@ -50,9 +63,15 @@ function candidate(e: any): Candidate {
   };
 }
 
+const seedKey = (s: { name: string; type: string }) => `${s.type}:${s.name}`;
+
 export async function resolveSeeds(profile: ProductProfile, qloo: Qloo, claude: Anthropic) {
-  const entityCandidates = await Promise.all(profile.qloo_seed_entities.map(async (s) => ({
-    seed: s, candidates: ((await qloo.search(s.name, `urn:entity:${s.type}`)).results ?? []).map(candidate) as Candidate[],
+  // The same seed can appear in two segments; look it up once.
+  const unique = new Map<string, ProductProfile["segments"][number]["seeds"][number]>();
+  for (const seg of profile.segments) for (const s of seg.seeds) if (!unique.has(seedKey(s))) unique.set(seedKey(s), s);
+
+  const entityCandidates = await Promise.all([...unique.entries()].map(async ([key, s]) => ({
+    key, seed: s, candidates: ((await qloo.search(s.name, `urn:entity:${s.type}`)).results ?? []).map(candidate) as Candidate[],
   })));
   const tagCandidates = await Promise.all(profile.qloo_tag_queries.map(async (q) => ({
     query: q, candidates: (((await qloo.tags(q)).results?.tags) ?? []).map((t: any) => ({ id: t.id, name: t.name, type: t.type })),
@@ -67,7 +86,7 @@ export async function resolveSeeds(profile: ProductProfile, qloo: Qloo, claude: 
       role: "user",
       content: JSON.stringify({
         product: { name: profile.name, one_liner: profile.one_liner, page_language: profile.page_language, pricing: profile.pricing },
-        seeds: entityCandidates.map(({ seed, candidates }) => ({ seed: seed.name, type: seed.type, meant_because: seed.why, candidates })),
+        seeds: entityCandidates.map(({ key, seed, candidates }) => ({ key, meant_because: seed.why, candidates })),
         tags: tagCandidates,
       }),
     }],
@@ -75,75 +94,127 @@ export async function resolveSeeds(profile: ProductProfile, qloo: Qloo, claude: 
   const verdict = response.parsed_output;
   if (!verdict) throw new Error(`Seed check failed (stop_reason: ${response.stop_reason})`);
 
-  const confirmed: ConfirmedSeed[] = [];
-  const rejected: TasteData["seeds"]["rejected"] = [];
-  for (const { seed, candidates } of entityCandidates) {
-    const v = verdict.entities.find((x) => x.seed === seed.name);
-    const match = v?.entity_id ? candidates.find((c) => c.id === v.entity_id) : undefined;
-    if (match) confirmed.push({ seed: seed.name, type: seed.type, entity_id: match.id, qloo_name: match.name, why: seed.why });
-    else rejected.push({ seed: seed.name, type: seed.type, reason: v?.reason ?? "no verdict" });
+  const matches = new Map<string, Candidate | null>();
+  const reasons = new Map<string, string>();
+  for (const { key, candidates } of entityCandidates) {
+    const v = verdict.entities.find((x) => x.key === key);
+    matches.set(key, (v?.entity_id && candidates.find((c) => c.id === v.entity_id)) || null);
+    reasons.set(key, v?.reason ?? "no verdict");
   }
+  const segments = profile.segments.map((seg) => ({
+    ...seg,
+    confirmed: seg.seeds.flatMap((s): ConfirmedSeed[] => {
+      const m = matches.get(seedKey(s));
+      return m ? [{ name: s.name, type: s.type, entity_id: m.id, qloo_name: m.name, why: s.why }] : [];
+    }),
+    rejected: seg.seeds.filter((s) => !matches.get(seedKey(s))).map((s) => ({ name: s.name, type: s.type, reason: reasons.get(seedKey(s))! })),
+  }));
   const tags = tagCandidates.flatMap(({ query, candidates }) => {
     const id = verdict.tags.find((t) => t.query === query)?.tag_id;
     const tag = candidates.find((c: any) => c.id === id);
     return tag ? [{ query, tag_id: tag.id, name: tag.name }] : [];
   });
-  return { confirmed, rejected, tags, markets: verdict.markets, usage: response.usage };
+  return { segments, tags, markets: verdict.markets, usage: response.usage };
 }
 
 // Nominatim (OpenStreetMap) turns heatmap coordinates into readable place names.
+// It allows one request per second, so lookups are cached and spaced out.
+const placeCache = new Map<string, string>();
 async function placeName(lat: number, lon: number): Promise<string> {
+  const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+  const hit = placeCache.get(key);
+  if (hit) return hit;
+  await new Promise((r) => setTimeout(r, 1100));
   const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&lat=${lat}&lon=${lon}`, {
     headers: { "User-Agent": "WhoWouldLove/0.1 (Qloo hackathon demo)", "Accept-Language": "en" },
   });
-  if (!res.ok) return `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
-  const a = ((await res.json()) as any).address ?? {};
-  const city = a.city ?? a.town ?? a.county ?? a.state_district ?? "";
-  return [city, a.state ?? a.country].filter(Boolean).join(", ") || `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+  let label = `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+  if (res.ok) {
+    const a = ((await res.json()) as any).address ?? {};
+    const city = a.city ?? a.town ?? a.village ?? a.municipality ?? a.county ?? a.state_district ?? "";
+    label = [city, a.state ?? a.country].filter(Boolean).join(", ") || label;
+  }
+  placeCache.set(key, label);
+  return label;
 }
 
-async function wherePopular(signal: string, market: string, qloo: Qloo): Promise<Place[]> {
+async function wherePopular(signal: string, market: string, max: number, qloo: Qloo): Promise<Place[]> {
   const body = await qloo.insights({
-    "filter.type": "urn:heatmap", "signal.interests.entities": signal, "filter.location.query": market, take: 40,
-  });
+    "filter.type": "urn:heatmap", "signal.interests.entities": signal, "filter.location.query": market, take: 30,
+  }).catch(() => ({}));
   const cells = [...(body.results?.heatmap ?? [])].sort((a: any, b: any) => b.query.affinity - a.query.affinity);
   const places: Place[] = [];
-  for (const c of cells) {
-    if (places.length >= 6) break;
+  for (const c of cells.slice(0, max * 2)) {
+    if (places.length >= max) break;
     const label = await placeName(c.location.latitude, c.location.longitude);
-    await new Promise((r) => setTimeout(r, 1100)); // Nominatim allows one request per second
     if (places.some((p) => p.label === label)) continue;
-    places.push({ label, latitude: c.location.latitude, longitude: c.location.longitude, affinity: c.query.affinity });
+    places.push({ label, latitude: c.location.latitude, longitude: c.location.longitude, affinity: Math.round(c.query.affinity * 1000) / 1000 });
   }
   return places;
 }
 
-export async function gatherTaste(seeds: ConfirmedSeed[], markets: string[], qloo: Qloo) {
-  const signal = seeds.map((s) => s.entity_id).join(",");
-  const seedIds = new Set(seeds.map((s) => s.entity_id));
+async function demographics(signal: string, qloo: Qloo): Promise<Demographics | null> {
+  const body = await qloo.insights({ "filter.type": "urn:demographics", "signal.interests.entities": signal }).catch(() => ({}));
+  const d = body.results?.demographics?.[0]?.query;
+  return d ? { age: d.age, gender: d.gender } : null;
+}
 
-  const affinities: Record<string, Affinity[]> = {};
+function toAffinity(e: any): Affinity {
+  return {
+    name: e.name, entity_id: e.entity_id,
+    affinity: Math.round((e.query?.affinity ?? 0) * 1000) / 1000,
+    popularity: Math.round((e.popularity ?? 0) * 1000) / 1000,
+    description: e.properties?.short_description ?? e.disambiguation ?? "",
+  };
+}
+
+// Three lists per type: global, a niche popularity band, and read inside the primary market
+// (so a seed loved abroad, e.g. Muji in Japan, cannot drag every result to another country).
+// The report writer picks from all three.
+async function affinities(signal: string, market: string, exclude: Set<string>, qloo: Qloo) {
+  const out: SegmentTaste["affinities"] = {};
   const weak: string[] = [];
   await Promise.all(AFFINITY_TYPES.map(async (type) => {
-    const body = await qloo.insights({ "filter.type": `urn:entity:${type}`, "signal.interests.entities": signal, take: 15 })
-      .catch(() => ({ results: { entities: [] } }));
-    const list: Affinity[] = (body.results?.entities ?? [])
-      .filter((e: any) => !seedIds.has(e.entity_id))
-      .map((e: any) => ({
-        name: e.name, entity_id: e.entity_id,
-        affinity: Math.round((e.query?.affinity ?? 0) * 1000) / 1000,
-        description: e.properties?.short_description ?? e.disambiguation ?? "",
-      }));
-    // Identical scores across the list mean Qloo had no real signal for this type.
-    if (list.length > 2 && new Set(list.map((a) => a.affinity)).size === 1) weak.push(type);
-    affinities[type] = list.slice(0, 12);
+    const ask = (extra: Record<string, string | number>) => qloo.insights({
+      "filter.type": `urn:entity:${type}`, "signal.interests.entities": signal, take: 15, ...extra,
+    }).then((b) => (b.results?.entities ?? []).map(toAffinity).filter((a: Affinity) => !exclude.has(a.entity_id)) as Affinity[])
+      .catch(() => [] as Affinity[]);
+    const [mainstream, nicheAll, local] = await Promise.all([
+      ask({}),
+      ask({ "filter.popularity.min": NICHE.min, "filter.popularity.max": NICHE.max }),
+      ask({ "signal.location.query": market }),
+    ]);
+    const niche = nicheAll.filter((a) => !mainstream.some((m) => m.entity_id === a.entity_id));
+    // Identical scores across a list mean Qloo had no real signal for this type.
+    if (mainstream.length > 2 && new Set(mainstream.map((a) => a.affinity)).size === 1) weak.push(type);
+    out[type] = { mainstream: mainstream.slice(0, 10), niche: niche.slice(0, 10), in_market: local.slice(0, 10) };
   }));
+  return { affinities: out, weak };
+}
 
-  const demo = await qloo.insights({ "filter.type": "urn:demographics", "signal.interests.entities": signal });
-  const d = demo.results?.demographics?.[0]?.query;
+export async function gatherTaste(resolved: Awaited<ReturnType<typeof resolveSeeds>>, qloo: Qloo, log = (_: string) => {}): Promise<TasteData> {
+  const allSeeds = resolved.segments.flatMap((s) => s.confirmed);
+  const exclude = new Set(allSeeds.map((s) => s.entity_id));
+  const primary = resolved.markets[0] ?? "United States";
 
+  const segments: SegmentTaste[] = [];
+  for (const seg of resolved.segments) {
+    if (seg.confirmed.length === 0) {
+      log(`skipped segment "${seg.name}": no confirmed seeds`);
+      continue;
+    }
+    const signal = seg.confirmed.map((s) => s.entity_id).join(",");
+    const [{ affinities: aff, weak }, demo] = await Promise.all([affinities(signal, primary, exclude, qloo), demographics(signal, qloo)]);
+    const places = await wherePopular(signal, primary, 5, qloo);
+    segments.push({
+      name: seg.name, description: seg.description, evidence: seg.evidence,
+      seeds: seg.confirmed, rejected: seg.rejected, affinities: aff, weak, demographics: demo, places,
+    });
+    log(`segment "${seg.name}" done`);
+  }
+
+  const signal = [...new Set(allSeeds.map((s) => s.entity_id))].join(",");
   const places: Record<string, Place[]> = {};
-  for (const m of markets) places[m] = await wherePopular(signal, m, qloo).catch(() => []);
-
-  return { affinities, weak_types: weak, demographics: d ? { age: d.age, gender: d.gender } : null, places };
+  for (const m of resolved.markets) places[m] = await wherePopular(signal, m, 6, qloo);
+  return { markets: resolved.markets, tags: resolved.tags, segments, overall: { demographics: await demographics(signal, qloo), places } };
 }
