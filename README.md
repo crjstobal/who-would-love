@@ -9,7 +9,8 @@ ad targeting ready to paste into Meta Ads and Reddit Ads.
 
 Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/) (deadline 2026-10-30, 23:45 EDT).
 
-> Status (2026-10-11): design mockups done; all API keys verified. Building the real pipeline.
+> Status (2026-10-11): the full pipeline runs locally end to end and produces a real report.
+> Next: the web app (form, background job, email) on Cloudflare.
 
 ## How it works
 
@@ -29,6 +30,20 @@ Every claim in the report carries one of three labels, and the report can be fil
 | Qloo data | Measured affinities, demographics and places from Qloo. They describe groups, never individuals. |
 | Web research | Communities and channels found on the open web, with links. |
 | Our interpretation | Our advice based on the above. |
+
+## Run it locally
+
+Needs Node 22+, the AWS CLI with access to the SSM parameters below, and `npm install`.
+
+```bash
+npm run report -- https://apps.apple.com/app/momentline-day-counter/id6811362832
+npm run report -- --from runs/<folder>   # reuse finished steps; delete a step's file to redo it
+```
+
+Each run writes to `runs/<folder>/` (ignored by git, because it holds Qloo responses):
+`00-page.json`, `01-profile.json`, `02-taste.json`, `03-communities.json`, `04-spec.json` and
+`report.html`. A full run takes about 6 minutes and costs about $2 (Claude tokens and web
+searches; Qloo is free during the hackathon).
 
 ## Mockups
 
@@ -64,9 +79,12 @@ The `qloo` CLI reads `QLOO_API_KEY` from the environment, so `qloo setup --qloo`
 
 - [x] Upload the API keys to SSM and verify them (2026-10-11).
 - [x] First Qloo harness test: `qloo setup --status` reports "Qloo data: ready", `find_tags` works.
-- [ ] Build real page reading (Firecrawl + Opus 5.5) and test it on Momentline.
-- [ ] Connect Qloo and replace the sample report with a real one.
-- [ ] Community search, report rendering, email delivery, Cloudflare deployment.
+- [x] Page reading (Firecrawl + Opus 5.5), tested on Momentline.
+- [x] Audience segments, Qloo seeds checked by the model, affinities, demographics, places.
+- [x] Community search with web search and link checks.
+- [x] Report writing and HTML rendering.
+- [ ] Web app: form, background job, email delivery, Cloudflare deployment.
+- [ ] "Whole website" mode (Firecrawl map + a capped number of pages).
 - [ ] Before making the repo public: check history for secrets with
       `git log -p | grep -iE 'api[_-]?key|secret|token'`.
 
