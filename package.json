@@ -1,0 +1,17 @@
+{
+  "name": "who-would-love",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "read": "tsx scripts/run-local.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
