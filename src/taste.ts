@@ -192,29 +192,39 @@ async function affinities(signal: string, market: string, exclude: Set<string>, 
   return { affinities: out, weak };
 }
 
-export async function gatherTaste(resolved: Awaited<ReturnType<typeof resolveSeeds>>, qloo: Qloo, log = (_: string) => {}): Promise<TasteData> {
-  const allSeeds = resolved.segments.flatMap((s) => s.confirmed);
-  const exclude = new Set(allSeeds.map((s) => s.entity_id));
-  const primary = resolved.markets[0] ?? "United States";
+export type Resolved = Awaited<ReturnType<typeof resolveSeeds>>;
+type ResolvedSegment = Resolved["segments"][number];
 
-  const segments: SegmentTaste[] = [];
-  for (const seg of resolved.segments) {
-    if (seg.confirmed.length === 0) {
-      log(`skipped segment "${seg.name}": no confirmed seeds`);
-      continue;
-    }
-    const signal = seg.confirmed.map((s) => s.entity_id).join(",");
-    const [{ affinities: aff, weak }, demo] = await Promise.all([affinities(signal, primary, exclude, qloo), demographics(signal, qloo)]);
-    const places = await wherePopular(signal, primary, 5, qloo);
-    segments.push({
-      name: seg.name, description: seg.description, evidence: seg.evidence,
-      seeds: seg.confirmed, rejected: seg.rejected, affinities: aff, weak, demographics: demo, places,
-    });
-    log(`segment "${seg.name}" done`);
-  }
+export const allSeedIds = (resolved: Resolved) => [...new Set(resolved.segments.flatMap((s) => s.confirmed.map((c) => c.entity_id)))];
 
-  const signal = [...new Set(allSeeds.map((s) => s.entity_id))].join(",");
+// One segment's taste: what else they love, how they lean, and where in the primary market.
+export async function gatherSegment(seg: ResolvedSegment, primary: string, exclude: string[], qloo: Qloo): Promise<SegmentTaste | null> {
+  if (seg.confirmed.length === 0) return null;
+  const signal = seg.confirmed.map((s) => s.entity_id).join(",");
+  const [{ affinities: aff, weak }, demo] = await Promise.all([affinities(signal, primary, new Set(exclude), qloo), demographics(signal, qloo)]);
+  const places = await wherePopular(signal, primary, 5, qloo);
+  return {
+    name: seg.name, description: seg.description, evidence: seg.evidence,
+    seeds: seg.confirmed, rejected: seg.rejected, affinities: aff, weak, demographics: demo, places,
+  };
+}
+
+// The whole audience at once, across every likely market.
+export async function gatherOverall(resolved: Resolved, qloo: Qloo): Promise<TasteData["overall"]> {
+  const signal = allSeedIds(resolved).join(",");
   const places: Record<string, Place[]> = {};
   for (const m of resolved.markets) places[m] = await wherePopular(signal, m, 6, qloo);
-  return { markets: resolved.markets, tags: resolved.tags, segments, overall: { demographics: await demographics(signal, qloo), places } };
+  return { demographics: await demographics(signal, qloo), places };
+}
+
+export async function gatherTaste(resolved: Resolved, qloo: Qloo, log = (_: string) => {}): Promise<TasteData> {
+  const primary = resolved.markets[0] ?? "United States";
+  const exclude = allSeedIds(resolved);
+  const segments: SegmentTaste[] = [];
+  for (const seg of resolved.segments) {
+    const out = await gatherSegment(seg, primary, exclude, qloo);
+    if (out) segments.push(out);
+    log(out ? `segment "${seg.name}" done` : `skipped segment "${seg.name}": no confirmed seeds`);
+  }
+  return { markets: resolved.markets, tags: resolved.tags, segments, overall: await gatherOverall(resolved, qloo) };
 }

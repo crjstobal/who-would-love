@@ -1,0 +1,23 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "who-would-love-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "workflows": [
+    { "name": "who-would-love-report", "binding": "REPORT", "class_name": "ReportWorkflow" }
+  ],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "who-would-love", "database_id": "0a65bc05-38db-46b1-9ea2-7d9023ea3279" }
+  ],
+  "vars": {
+    "DAILY_CAP": "25",
+    "PER_IP_DAILY_CAP": "3",
+    "TURNSTILE_SITE_KEY": "REPLACE_ME"
+  }
+  // Secrets (set with `wrangler secret put`, loaded from AWS SSM by scripts/deploy.sh):
+  // ANTHROPIC_API_KEY, FIRECRAWL_API_KEY, QLOO_API_KEY, TURNSTILE_SECRET, IP_SALT
+}

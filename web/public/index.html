@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who Would Love</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4f1; --card:#ffffff; --ink:#15121b; --ink-2:#5d5866; --ink-3:#8b8693; --line:#e4e0e8;
+  --night:#08121a; --night-2:#0f1d27; --m1:#0e5e63; --m2:#e2552d; --m3:#16365c; --m4:#f2a33a; --plum:#5b2a86; --magenta:#a03c78; --accent:#ff6a3d; --accent-2:#e2552d;
+  --qloo:#2f7a63; --web:#4062e0; --ours:#c98a1f;
+  --display:'Bricolage Grotesque',system-ui,sans-serif; --sans:'Geist',system-ui,sans-serif; --mono:'Geist Mono',ui-monospace,monospace;
+  --r:22px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+img{display:block;max-width:100%}
+.wrap{max-width:1360px;margin:0 auto;padding:0 32px}
+
+/* ---------- logo ---------- */
+.logo{font-family:var(--display);font-weight:600;font-size:27px;letter-spacing:-.025em;text-decoration:none;display:flex;align-items:center;gap:12px;line-height:1;color:var(--ink)}
+.logo svg{width:36px;height:43px;flex:none;color:var(--ink)}
+.logo.light,.logo.light svg{color:#fff}
+
+/* ---------- nav ---------- */
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
+.navlinks{display:flex;gap:6px;font-size:15px}
+.navlinks a{text-decoration:none;color:var(--ink-2);padding:8px 14px;border-radius:999px;transition:background .2s,color .2s}
+.navlinks a:hover{background:#ebe7ee;color:var(--ink)}
+.navlinks a.cta{background:var(--ink);color:#fff}
+.navlinks a.cta:hover{background:var(--accent-2)}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;border-radius:32px;background:var(--night);color:#fff;padding:88px 40px 64px;isolation:isolate}
+.mesh{position:absolute;inset:0;z-index:-2;overflow:hidden}
+.mesh i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.75;animation:float 22s ease-in-out infinite alternate}
+.mesh i:nth-child(1){width:52%;height:70%;left:-8%;top:-20%;background:var(--m1)}
+.mesh i:nth-child(2){width:40%;height:60%;right:-6%;top:10%;background:var(--m2);opacity:.5;animation-duration:26s;animation-delay:-6s}
+.mesh i:nth-child(3){width:34%;height:50%;left:30%;bottom:-30%;background:var(--m3);animation-duration:30s;animation-delay:-12s}
+.mesh i:nth-child(4){width:18%;height:26%;right:24%;top:-6%;background:var(--m4);opacity:.3;animation-duration:19s}
+@keyframes float{0%{transform:translate(0,0) scale(1)}50%{transform:translate(6%,8%) scale(1.12)}100%{transform:translate(-5%,-4%) scale(.95)}}
+.grain{position:absolute;inset:0;z-index:-1;opacity:.12;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* big drawing mark behind the headline */
+.bigmark{position:absolute;z-index:-1;left:50%;top:40px;transform:translateX(-50%);height:min(720px,92%);width:auto;pointer-events:none}
+.bigmark .l{stroke:rgba(255,255,255,.16)}
+.bigmark .q{stroke:var(--accent)}
+.bigmark .l,.bigmark .q{stroke-dasharray:1;stroke-dashoffset:1;animation:drawL 10s cubic-bezier(.65,0,.35,1) infinite}
+.bigmark .q{animation-name:drawQ;opacity:.55}
+.bigmark .d{fill:var(--accent);opacity:0;transform-origin:20px 43.5px;animation:dot 10s cubic-bezier(.34,1.56,.64,1) infinite}
+@keyframes drawL{0%{stroke-dashoffset:1;opacity:1}16%{stroke-dashoffset:0}82%{stroke-dashoffset:0;opacity:1}94%,100%{stroke-dashoffset:0;opacity:0}}
+@keyframes drawQ{0%,14%{stroke-dashoffset:1;opacity:.55}38%{stroke-dashoffset:0}82%{stroke-dashoffset:0;opacity:.55}94%,100%{stroke-dashoffset:0;opacity:0}}
+@keyframes dot{0%,38%{opacity:0;transform:scale(0)}44%{opacity:.7;transform:scale(1)}82%{opacity:.7;transform:scale(1)}94%,100%{opacity:0;transform:scale(1)}}
+
+.hero-in{position:relative;text-align:center;max-width:1100px;margin:0 auto}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);backdrop-filter:blur(8px);padding:7px 14px;border-radius:999px}
+.pill b{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(40px,7vw,104px);line-height:1.02;letter-spacing:-.04em;margin:0 0 26px}
+.rot{display:block;white-space:nowrap;text-align:center;height:1.08em;padding-bottom:.08em;font-size:min(1em,10.2vw)}
+.rot .ch{display:inline-block;background:linear-gradient(100deg,#ffb38f,var(--accent) 45%,#ff4f7b);-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:chIn .7s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*32ms)}
+.rot.leaving .ch{animation:chOut .45s cubic-bezier(.6,0,.8,.4) both;animation-delay:calc(var(--i)*22ms)}
+@keyframes chIn{from{opacity:0;transform:translateY(.5em) rotate(8deg);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes chOut{to{opacity:0;transform:translateY(-.4em) rotate(-6deg);filter:blur(8px)}}
+.lede{font-size:19px;line-height:1.55;color:rgba(255,255,255,.72);max-width:38em;margin:0 auto}
+
+/* ---------- form: vertical flow ---------- */
+.form{max-width:720px;margin:48px auto 0;background:var(--card);color:var(--ink);border-radius:26px;padding:30px 30px 26px;text-align:left;box-shadow:0 40px 80px -30px rgba(0,0,0,.6)}
+.step{display:grid;grid-template-columns:34px 1fr;gap:0 16px;position:relative;padding-bottom:22px}
+.step::before{content:"";position:absolute;left:16px;top:34px;bottom:0;width:2px;background:linear-gradient(var(--line),var(--line))}
+.step:last-of-type::before{display:none}
+.num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:500;background:#f1eef4;color:var(--ink-2);transition:background .3s,color .3s;position:relative;z-index:1}
+.step.ok .num{background:var(--ink);color:#fff}
+.step label.t{display:block;font-weight:600;font-size:15.5px;margin:6px 0 10px}
+.step input[type=url],.step input[type=email]{width:100%;font:inherit;font-size:17px;padding:15px 16px;border:1.5px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);transition:border-color .2s,box-shadow .2s}
+.step input[type=url]{font-size:19px;padding:18px}
+.step input:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 4px rgba(91,42,134,.12)}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choices label{position:relative;border:1.5px solid var(--line);border-radius:14px;padding:13px 14px 13px 42px;cursor:pointer;transition:border-color .2s,background .2s}
+.choices input{position:absolute;opacity:0}
+.choices label::before{content:"";position:absolute;left:14px;top:15px;width:16px;height:16px;border-radius:50%;border:1.5px solid #bdb6c6;transition:all .2s}
+.choices label:has(input:checked){border-color:var(--ink);background:#faf9fb}
+.choices label:has(input:checked)::before{border:5px solid var(--ink);background:#fff}
+.choices label:has(input:focus-visible){box-shadow:0 0 0 4px rgba(91,42,134,.15)}
+.choices b{display:block;font-size:15px}
+.choices small{display:block;color:var(--ink-2);font-size:13px;line-height:1.4;margin-top:2px}
+.hint{font-size:13px;color:var(--plum);margin-top:9px;min-height:1.3em}
+button.go{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:6px;font:inherit;font-weight:600;font-size:17px;padding:18px;border:0;border-radius:16px;cursor:pointer;color:#fff;
+  background:linear-gradient(100deg,var(--ink),#16303a);transition:transform .15s,box-shadow .2s,background .3s}
+button.go:hover{background:linear-gradient(100deg,var(--accent-2),#ff4f7b);box-shadow:0 14px 30px -12px rgba(226,85,45,.7)}
+button.go:active{transform:scale(.99)}
+button.go span{transition:transform .2s}button.go:hover span{transform:translateX(4px)}
+.fine{font-size:13px;color:var(--ink-3);margin-top:12px;text-align:center}
+.sent{display:none;text-align:center;padding:12px 4px 4px}
+.sent h3{font-family:var(--display);font-weight:600;font-size:34px;letter-spacing:-.03em}
+.sent p{color:var(--ink-2)}
+.live{list-style:none;margin:22px auto 6px;max-width:380px;text-align:left}
+.live li{display:flex;gap:12px;align-items:center;padding:9px 0;color:var(--ink-3);transition:color .3s}
+.live li i{width:10px;height:10px;border-radius:50%;border:2px solid #cfc9d6;transition:all .3s}
+.live li.done{color:var(--ink)}.live li.done i{background:var(--qloo);border-color:var(--qloo)}
+.live li.now i{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,106,61,.2)}
+.proof{display:flex;gap:26px;justify-content:center;margin-top:30px;flex-wrap:wrap;font-size:14px;color:rgba(255,255,255,.7)}
+.proof span::before{content:"✓  ";color:var(--accent)}
+
+/* ---------- sections ---------- */
+section{padding:120px 0 0}
+.kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+h2{font-family:var(--display);font-weight:600;font-size:clamp(38px,5vw,68px);line-height:1;letter-spacing:-.035em;margin-top:14px;max-width:14em}
+.sub{color:var(--ink-2);font-size:18px;max-width:34em;margin-top:18px}
+
+.row{display:grid;grid-template-columns:.8fr 1.2fr;gap:64px;align-items:center;margin-top:88px}
+.row.flip{grid-template-columns:1.2fr .8fr}
+.row.flip .txt{order:2}
+.txt .n{font-family:var(--mono);font-size:14px;color:var(--accent-2)}
+.txt h3{font-family:var(--display);font-weight:600;font-size:34px;letter-spacing:-.03em;line-height:1.05;margin:10px 0 12px}
+.txt p{color:var(--ink-2);font-size:17px}
+.txt .note{font-size:13px;color:var(--ink-3);margin-top:14px}
+.stage{position:relative;border-radius:var(--r);background:var(--card);border:1px solid var(--line);overflow:hidden;min-height:440px}
+.graph{min-height:500px}
+
+/* visual 1: browser reading the page */
+.browser{position:absolute;inset:28px 28px 0 28px;border-radius:14px 14px 0 0;background:#fff;border:1px solid var(--line);border-bottom:0;box-shadow:0 30px 60px -30px rgba(21,18,27,.35);overflow:hidden}
+.chrome{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);background:#faf9fb}
+.chrome i{width:11px;height:11px;border-radius:50%;background:#e2dde7}
+.chrome .addr{flex:1;margin-left:12px;font-family:var(--mono);font-size:12px;color:var(--ink-3);background:#f1eef4;border-radius:8px;padding:5px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.listing{display:flex;gap:18px;padding:22px 22px 0;align-items:center}
+.listing img{width:84px;height:84px;border-radius:20px}
+.listing h4{font-family:var(--display);font-size:23px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.listing p{font-size:14px;color:var(--ink-2)}
+.listing .get{display:inline-block;margin-top:8px;background:#0a84ff;color:#fff;font-weight:600;font-size:13px;padding:4px 16px;border-radius:999px}
+.shots{display:flex;gap:12px;padding:20px 22px}
+.shots img{width:31%;border-radius:12px;border:1px solid var(--line)}
+.scan{position:absolute;left:0;right:0;height:90px;top:40px;background:linear-gradient(180deg,transparent,rgba(255,106,61,.16) 70%,rgba(255,106,61,.65) 98%,transparent);animation:scan 4.5s cubic-bezier(.65,0,.35,1) infinite;pointer-events:none}
+@keyframes scan{0%{transform:translateY(-100px);opacity:0}10%{opacity:1}80%{transform:translateY(420px);opacity:1}100%{transform:translateY(440px);opacity:0}}
+.extract{position:absolute;right:20px;top:72px;display:flex;flex-direction:column;gap:9px;align-items:flex-end}
+.extract span{font-size:13px;font-weight:500;background:var(--ink);color:#fff;padding:7px 12px;border-radius:10px;box-shadow:0 10px 24px -10px rgba(0,0,0,.5);opacity:0;transform:translateX(16px);animation:pop 4.5s ease infinite}
+.extract span small{font-family:var(--mono);font-size:10.5px;color:var(--accent);margin-right:6px;text-transform:uppercase;letter-spacing:.05em}
+.extract span:nth-child(2){animation-delay:.25s}.extract span:nth-child(3){animation-delay:.5s}.extract span:nth-child(4){animation-delay:.75s}
+@keyframes pop{0%,30%{opacity:0;transform:translateX(16px)}40%,88%{opacity:1;transform:none}100%{opacity:0;transform:translateX(0)}}
+
+/* visual 2: taste graph */
+.graph{background:radial-gradient(circle at 50% 50%,#fff 0,#f4f1f6 70%)}
+.graph svg.edges{position:absolute;inset:0;width:100%;height:100%}
+.graph svg.edges line{stroke:#bdb5c8;stroke-width:1.5;stroke-dasharray:4 5;animation:dash 18s linear infinite}
+.graph svg.edges line.hot{stroke:var(--plum);stroke-dasharray:none;stroke-width:2;opacity:.55}
+@keyframes dash{to{stroke-dashoffset:-200}}
+.core{position:absolute;left:50%;top:50%;width:150px;height:150px;transform:translate(-50%,-50%);border-radius:50%;box-shadow:0 30px 60px -20px rgba(91,42,134,.55)}
+.core::before{content:"";position:absolute;inset:-7px;border-radius:50%;background:conic-gradient(from 0deg,var(--plum),var(--accent),var(--magenta),var(--plum));animation:ring 8s linear infinite}
+.core img{position:relative;width:100%;height:100%;border-radius:50%;border:5px solid #fff}
+.core b{position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;white-space:nowrap}
+@keyframes ring{to{transform:rotate(360deg)}}
+.node{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px 13px 7px 7px;font-size:14.5px;font-weight:500;white-space:nowrap;box-shadow:0 10px 24px -14px rgba(21,18,27,.35);animation:bob 6s ease-in-out infinite;animation-delay:var(--d)}
+.node.hot{background:var(--ink);color:#fff;border-color:var(--ink)}
+.node em{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-style:normal;font-size:15px;background:#f1eef4}
+.node.hot em{background:rgba(255,255,255,.12)}
+.node small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);line-height:1}
+.node.hot small{color:var(--accent)}
+.node span{line-height:1.25}
+@keyframes bob{0%,100%{margin-top:0}50%{margin-top:-6px}}
+.graph .cap{position:absolute;left:0;right:0;top:22px;text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+
+/* visual 3: places */
+.places{padding:26px;display:grid;grid-template-columns:1fr 1fr;gap:14px;background:linear-gradient(180deg,#fff,#f7f5f9)}
+.place{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff;transition:transform .25s,box-shadow .25s}
+.place:hover{transform:translateY(-3px);box-shadow:0 18px 30px -18px rgba(21,18,27,.35)}
+.place .top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ico{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;flex:none}
+.ico.rd{background:#ff4500}.ico.fb{background:#1877f2}.ico.nl{background:var(--ink)}.ico.pd{background:#8e44ad}
+.place b{font-size:15.5px}
+.place .kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);display:block}
+.place p{font-size:14px;color:var(--ink-2);line-height:1.45}
+.place .why{display:inline-block;margin-top:9px;font-size:12px;font-weight:500;color:var(--plum);background:#f3eef8;padding:3px 9px;border-radius:999px}
+.place.wide{grid-column:span 2;display:flex;gap:14px;align-items:flex-start}
+.place.wide .paste{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;color:var(--ink)}
+.fun{display:inline-flex;align-items:center;gap:12px;margin-top:22px;padding:12px 16px 12px 12px;background:#fff;border:1px dashed #d8d2de;border-radius:16px;font-size:14.5px;color:var(--ink-2);text-decoration:none;transform:rotate(-1.5deg);transition:transform .25s,border-color .25s}
+.fun:hover{transform:rotate(0);border-color:var(--accent)}
+.fun img{width:38px;height:38px;border-radius:10px}
+.fun b{color:var(--ink)}
+/* provenance */
+.prov{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px}
+.prov div{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:30px}
+.tag{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:500;padding:5px 10px;border-radius:999px;color:#fff}
+.tag::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;opacity:.8}
+.tag.q{background:var(--qloo)}.tag.w{background:var(--web)}.tag.o{background:var(--ours)}
+.prov h3{font-family:var(--display);font-weight:600;font-size:24px;letter-spacing:-.02em;margin:18px 0 8px}
+.prov p{color:var(--ink-2)}
+
+/* faq */
+.faq{display:grid;grid-template-columns:1fr 1fr;gap:0 56px;margin-top:40px}
+.faq details{border-bottom:1px solid var(--line);padding:22px 0}
+.faq summary{cursor:pointer;font-weight:600;font-size:18px;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::after{content:"+";font-family:var(--display);font-size:24px;line-height:1;color:var(--ink-3);transition:transform .3s}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq p{color:var(--ink-2);margin-top:10px}
+
+/* final cta + footer */
+.final{margin-top:120px;border-radius:32px;background:var(--night);color:#fff;text-align:center;padding:90px 30px;position:relative;overflow:hidden;isolation:isolate}
+.final h2{margin:0 auto;max-width:13em}
+.final a{display:inline-block;margin-top:30px;background:#fff;color:var(--ink);font-weight:600;text-decoration:none;padding:16px 28px;border-radius:14px}
+.final a:hover{background:var(--accent);color:#fff}
+footer{padding:70px 0 40px}
+.fgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:32px}
+footer p.tl{margin-top:16px;font-size:15px;max-width:24em;color:var(--ink-2)}
+footer h4{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px;font-weight:500}
+footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-decoration:none;color:var(--ink-2)}footer a:hover{color:var(--ink)}
+.legal{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:52px;padding-top:24px;font-size:13.5px;color:var(--ink-3)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.bigmark .l,.bigmark .q{stroke-dashoffset:0}.bigmark .d{opacity:.7}.extract span{opacity:1;transform:none}}
+@media (max-width:960px){
+  .wrap{padding:0 16px}
+  .hero{padding:64px 18px 40px;border-radius:24px}
+  .row,.row.flip{grid-template-columns:1fr;gap:28px;margin-top:64px}
+  .row.flip .txt{order:0}
+  .prov,.faq,.places{grid-template-columns:1fr}
+  .place.wide{grid-column:auto}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .navlinks a:not(.cta){display:none}
+  .choices{grid-template-columns:1fr}
+  .form{padding:22px 18px}
+  .extract{display:none}
+  .logo{font-size:22px}.logo svg{width:28px;height:34px}
+  .pill{font-size:12px}
+  .node:nth-of-type(n+6){display:none}
+}
+.ts{margin:4px 0 0}.ts:empty{display:none}
+.err{color:#b3261e;font-size:14.5px;font-weight:500;margin-top:10px;min-height:0}.err:empty{display:none}
+.go[disabled]{opacity:.6;cursor:progress}
+.note a{color:inherit}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="0 0 40 48">
+    <path stroke="currentColor" d="M20 37 C 9 29, 3 22, 3.5 14 C 4 7, 10 4, 14.5 5 C 17.5 5.7, 19.2 7.6, 20 10" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M20 10 C 21.5 5.5, 26 3.6, 30 4.6 C 35 5.8, 37.5 10.5, 36 15.5 C 34.5 20.5, 27 22.5, 23.5 26 C 21.2 28.3, 20.4 31, 20.2 33.5" fill="none" stroke="#ff6a3d" stroke-width="5.5" stroke-linecap="round"/>
+    <circle cx="20" cy="43.5" r="3.4" fill="#ff6a3d"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <nav>
+    <a class="logo" href="#"><svg aria-hidden="true"><use href="#mark"/></svg>Who Would Love</a>
+    <div class="navlinks"><a href="#how">How it works</a><a href="/r/momentline">Sample report</a><a href="#faq">FAQ</a><a class="cta" href="#start">Try it free</a></div>
+  </nav>
+
+  <div class="hero" id="start">
+    <div class="mesh"><i></i><i></i><i></i><i></i></div>
+    <div class="grain"></div>
+    <svg class="bigmark" viewBox="0 0 40 48" aria-hidden="true">
+      <path class="l" pathLength="1" d="M20 37 C 9 29, 3 22, 3.5 14 C 4 7, 10 4, 14.5 5 C 17.5 5.7, 19.2 7.6, 20 10" fill="none" stroke-width=".7" stroke-linecap="round"/>
+      <path class="q" pathLength="1" d="M20 10 C 21.5 5.5, 26 3.6, 30 4.6 C 35 5.8, 37.5 10.5, 36 15.5 C 34.5 20.5, 27 22.5, 23.5 26 C 21.2 28.3, 20.4 31, 20.2 33.5" fill="none" stroke-width="1.6" stroke-linecap="round"/>
+      <circle class="d" cx="20" cy="43.5" r="1.2"/>
+    </svg>
+
+    <div class="hero-in">
+      <h1>Paste a link and discover<br>who would love<span class="rot" id="rot"></span></h1>
+      
+      <p class="lede">We read your page, match it against real cultural taste data from Qloo, and build you a report: who your audience is, what else they love, and the communities where you can actually reach them.</p>
+
+      <form class="form" id="f" onsubmit="send(event);return false">
+        <div id="fields">
+          <div class="step" id="s1">
+            <div class="num">1</div>
+            <div><label class="t" for="url">Paste your link</label>
+              <input id="url" type="url" required placeholder="https://apps.apple.com/app/your-app" oninput="guess()"></div>
+          </div>
+          <div class="step" id="s2">
+            <div class="num">2</div>
+            <div><span class="t" style="display:block;font-weight:600;font-size:15.5px;margin:6px 0 10px">What should we read?</span>
+              <div class="choices">
+                <label><input type="radio" name="scope" value="page" checked><b>Just this page</b><small>A store listing, landing page or product page.</small></label>
+                <label><input type="radio" name="scope" value="site"><b>The whole website</b><small>Your home page plus up to 4 key pages: features, pricing, about.</small></label>
+              </div>
+              <div class="hint" id="hint"></div></div>
+          </div>
+          <div id="ts" class="ts"></div>
+          <button class="go" id="go" type="submit">Find who would love it <span>→</span></button>
+          <p class="err" id="err" role="alert"></p>
+          <p class="fine">No signup, no email. It takes about six minutes; you can leave and come back to the same link.</p>
+        </div>
+      </form>
+      <div class="proof"><span>No signup</span><span>Report in about 6 minutes</span><span>Ready-to-paste ad targeting</span></div>
+    </div>
+  </div>
+</div>
+
+<section id="how"><div class="wrap">
+  <div class="kicker">How it works</div>
+  <h2>From a link to a list of places to advertise.</h2>
+  <p class="sub">Most makers advertise where everyone in their category already does. The interesting audience is usually one step sideways. Here is the whole trip, using a real app: Momentline.</p>
+
+  <div class="row">
+    <div class="txt"><div class="n">01</div><h3>We read your product</h3><p>An AI agent opens your page like a browser would, or walks your whole site, and works out what you make, its tone and who it seems built for.</p>
+      <a class="fun" href="https://apps.apple.com/app/momentline-day-counter/id6811362832" target="_blank" rel="noopener"><img src="assets/momentline-icon.jpg" alt=""><span>Psst: <b>Momentline is a real app</b>, and it is free.<br>In case you fancy counting down to something.</span></a></div>
+    <div class="stage">
+      <div class="browser">
+        <div class="chrome"><i></i><i></i><i></i><div class="addr">apps.apple.com/app/momentline-day-counter/id6811362832</div></div>
+        <div class="listing"><img src="assets/momentline-icon.jpg" alt="Momentline app icon"><div><h4>Momentline: Day Counter</h4><p>Countdown &amp; Days Since · Utilities</p><span class="get">Get</span></div></div>
+        <div class="shots"><img src="assets/momentline-shot1.jpg" alt=""><img src="assets/momentline-shot2.jpg" alt=""><img src="assets/momentline-shot3.jpg" alt=""></div>
+        <div class="scan"></div>
+      </div>
+      <div class="extract">
+        <span><small>is</small>Personal timeline app</span>
+        <span><small>tone</small>Calm, poetic, design-led</span>
+        <span><small>for</small>People living toward a date</span>
+        <span><small>value</small>Private, no account</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row flip">
+    <div class="txt"><div class="n">02</div><h3>We ask the taste graph</h3><p>Qloo knows what fans of similar things also love across music, film, books, podcasts, brands and places, and where those fans live. We follow the connections that are strongest and least obvious.</p><p class="note">Real Qloo results from <a href="/r/momentline">our Momentline report</a>, one per audience it found.</p></div>
+    <div class="stage graph" id="graph">
+      <div class="cap">Momentline's taste neighbourhood</div>
+      <svg class="edges" id="edges"></svg>
+      <div class="core"><img src="assets/momentline-icon.jpg" alt=""><b>Momentline</b></div>
+      <div class="node hot" style="left:20%;top:30%;--d:-1s"><em>♪</em><span><small>Music · 0.94</small>Gregory Alan Isakov</span></div>
+      <div class="node" style="left:78%;top:24%;--d:-3s"><em>📖</em><span><small>Book · 0.90</small>Atlas of the Heart</span></div>
+      <div class="node hot" style="left:82%;top:46%;--d:-2s"><em>📺</em><span><small>TV · 0.96</small>Abstract: The Art of Design</span></div>
+      <div class="node" style="left:15%;top:55%;--d:-4s"><em>☾</em><span><small>Podcast · 0.94</small>Astronomy Cast</span></div>
+      <div class="node hot" style="left:72%;top:80%;--d:-5s"><em>🎬</em><span><small>Film · 0.95</small>The Great Hack</span></div>
+      <div class="node" style="left:28%;top:84%;--d:-2.5s"><em>✈</em><span><small>Destination · 0.98</small>Kyoto</span></div>
+      <div class="node" style="left:47%;top:20%;--d:-.5s"><em>◎</em><span><small>Brand · 0.86</small>Kånken</span></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="txt"><div class="n">03</div><h3>We find the doors</h3><p>Then we go and find where those people actually gather, with links, so you can post, sponsor or target ads there. Not "app lovers". The couples counting days until they meet again.</p><p class="note">Real finds from <a href="/r/momentline">our Momentline report</a>, with the sizes we saw when we checked.</p></div>
+    <div class="stage places">
+      <div class="place"><div class="top"><span class="ico rd">r/</span><div><span class="kind">Reddit · 2.5M members</span><b>r/LongDistance</b></div></div><p>Couples counting the days until they see each other again.</p><span class="why">Counts down, every single day</span></div>
+      <div class="place"><div class="top"><span class="ico rd">r/</span><div><span class="kind">Reddit</span><b>r/Sufjan</b></div></div><p>Qloo says the sentimental audience loves Sufjan Stevens. His fans gather here.</p><span class="why">Found through taste, not keywords</span></div>
+      <div class="place"><div class="top"><span class="ico nl">✉</span><div><span class="kind">Newsletter · 36,000+ readers</span><b>Dense Discovery</b></div></div><p>A weekly design newsletter that takes sponsors, for the design-minded audience.</p><span class="why">Calm, design-first readers</span></div>
+      <div class="place"><div class="top"><span class="ico rd">r/</span><div><span class="kind">Reddit · 3.1M members</span><b>r/Astronomy</b></div></div><p>Stargazers who plan around meteor showers and eclipses.</p><span class="why">Celestial Pack, perfect fit</span></div>
+      <div class="place wide"><span class="ico fb">f</span><div style="flex:1"><span class="kind">Meta Ads interests</span><b>Ready to paste</b><div class="paste">Long-distance relationship, Bullet journal, Bon Iver, Sufjan Stevens, Brené Brown</div></div></div>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="kicker">Trust</div>
+  <h2>You always know where each claim comes from.</h2>
+  <div class="prov">
+    <div><span class="tag q">Qloo data</span><h3>Measured taste</h3><p>Affinities, demographics and places straight from Qloo's taste graph. They describe groups of fans, never individuals.</p></div>
+    <div><span class="tag w">Web research</span><h3>Found and linked</h3><p>Communities and channels we found on the open web, with the link and the size we saw when we checked.</p></div>
+    <div><span class="tag o">Our interpretation</span><h3>Our advice</h3><p>What we would do with all of the above. Clearly marked, so you can disagree with it.</p></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <div class="kicker">FAQ</div>
+  <h2>Questions</h2>
+  <div class="faq">
+    <details><summary>Do I need an account?</summary><p>No. Paste a link, wait about six minutes, read your report. Each report gets its own link you can share.</p></details>
+    <details><summary>What is Qloo?</summary><p>A cultural intelligence company whose taste graph covers hundreds of millions of artists, films, books, brands, places and more. We use it to ground the report in real affinity data instead of guesses.</p></details>
+    <details><summary>Page or whole website?</summary><p>Pick "just this page" for a store listing or a single product. Pick "the whole website" when your home page alone does not explain what you do.</p></details>
+    <details><summary>Is my data shared?</summary><p>Only the public content of your page is analysed. We do not ask for your email or any personal data, and nothing personal is ever sent to Qloo.</p></details>
+    <details><summary>Can I use this for Facebook or Reddit ads?</summary><p>Yes. The report ends with interest lists and communities formatted to paste into ad managers.</p></details>
+    <details><summary>Why is it free?</summary><p>It is a demo built for the Qloo Agentic Hackathon. Each report runs real AI and data queries, so there is a small daily limit.</p></details>
+    <details><summary>How accurate is it?</summary><p>Qloo data describes what groups of fans tend to like. It is a strong starting point for testing, not a guarantee of who will buy.</p></details>
+  </div>
+
+  <div class="final">
+    <div class="mesh"><i></i><i></i><i></i><i></i></div>
+    <h2>Somebody out there would love what you made.</h2>
+    <a href="#start">Find them →</a>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="fgrid">
+    <div><a class="logo" href="#"><svg aria-hidden="true"><use href="#mark"/></svg>Who Would Love</a><p class="tl">Audience reports for people who make things. Taste data by Qloo.</p></div>
+    <div><h4>Product</h4><ul><li><a href="#how">How it works</a></li><li><a href="/r/momentline">Sample report</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+    <div><h4>Resources</h4><ul><li><a href="/about#method">Methodology</a></li><li><a href="https://github.com/crjstobal/who-would-love">Source code</a></li><li><a href="/r/momentline">Sample report</a></li></ul></div>
+    <div><h4>Legal</h4><ul><li><a href="/about#privacy">Privacy</a></li><li><a href="/about#terms">Terms</a></li><li><a href="mailto:hi@javi.link">Contact</a></li></ul></div>
+  </div>
+  <div class="legal"><span>© 2026 Who Would Love. Open source under the MIT license.</span><span>Built for the Qloo Agentic Hackathon.</span></div>
+</div></footer>
+
+<script>
+/* rotating word, letter by letter */
+const words=['your app','your product','your service','your game','your shop','your newsletter'];
+const rot=document.getElementById('rot');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function paint(w){
+  rot.innerHTML=[...w].map((c,i)=>`<span class="ch" style="--i:${i}">${c===' '?'&nbsp;':c}</span>`).join('');
+}
+let wi=0; paint(words[0]);
+setInterval(()=>{
+  wi=(wi+1)%words.length; const next=words[wi];
+  if(reduce){paint(next);return;}
+  rot.classList.add('leaving');
+  setTimeout(()=>{rot.classList.remove('leaving');paint(next);},420);
+},2800);
+
+/* form */
+function guess(){
+  const v=document.getElementById('url').value.trim(), h=document.getElementById('hint');
+  document.getElementById('s1').classList.toggle('ok',/^https?:\/\/.+\..+/.test(v));
+  try{
+    const u=new URL(v); const deep=u.pathname.replace(/\/$/,'').length>0;
+    document.querySelector(`input[value=${deep?'page':'site'}]`).checked=true;
+    document.getElementById('s2').classList.add('ok');
+    h.textContent=deep?'Looks like a specific page, so we picked "just this page".':'Looks like a home page, so we picked "the whole website".';
+  }catch(e){h.textContent='';document.getElementById('s2').classList.remove('ok');}
+}
+document.querySelectorAll('input[name=scope]').forEach(r=>r.addEventListener('change',()=>document.getElementById('s2').classList.add('ok')));
+
+/* turnstile (invisible captcha), loaded only if the API gives us a site key */
+let tsToken='', tsWidget=null;
+fetch('/api/config').then(r=>r.json()).then(c=>{
+  if(!c.turnstileSiteKey||c.turnstileSiteKey==='REPLACE_ME') return;
+  window.onTs=()=>{tsWidget=turnstile.render('#ts',{sitekey:c.turnstileSiteKey,size:'flexible',appearance:'interaction-only',callback:t=>tsToken=t,'expired-callback':()=>tsToken=''})};
+  const sc=document.createElement('script');sc.src='https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTs&render=explicit';sc.async=true;document.head.appendChild(sc);
+}).catch(()=>{});
+
+async function send(e){
+  e.preventDefault();
+  const go=document.getElementById('go'), err=document.getElementById('err');
+  err.textContent=''; go.disabled=true; go.firstChild.textContent='Starting your report ';
+  try{
+    const r=await fetch('/api/reports',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      url:document.getElementById('url').value.trim(),
+      scope:document.querySelector('input[name=scope]:checked').value,
+      token:tsToken})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Something went wrong. Please try again.');
+    location.href='/r/'+d.id;
+  }catch(x){
+    err.textContent=x.message; go.disabled=false; go.firstChild.textContent='Find who would love it ';
+    if(tsWidget!==null&&window.turnstile){turnstile.reset(tsWidget);tsToken='';}
+  }
+  return false;
+}
+
+/* taste graph edges */
+function edges(){
+  const g=document.getElementById('graph'), svg=document.getElementById('edges'), r=g.getBoundingClientRect();
+  const core=g.querySelector('.core').getBoundingClientRect(), cx=core.left+core.width/2-r.left, cy=core.top+core.height/2-r.top;
+  svg.innerHTML=[...g.querySelectorAll('.node')].filter(n=>n.offsetParent).map(n=>{
+    const b=n.getBoundingClientRect();
+    return `<line class="${n.classList.contains('hot')?'hot':''}" x1="${cx}" y1="${cy}" x2="${b.left+b.width/2-r.left}" y2="${b.top+b.height/2-r.top}"/>`;
+  }).join('');
+}
+edges(); addEventListener('resize',edges); setInterval(edges,120);
+</script>
+</body>
+</html>

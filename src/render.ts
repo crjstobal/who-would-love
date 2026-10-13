@@ -51,8 +51,11 @@ function communitiesTable(list: Community[]) {
 
 export function renderReport(input: {
   page: ScrapedPage; profile: ProductProfile; taste: TasteData; communities: Community[]; spec: ReportSpec; date: string; id: string;
+  pagesRead?: number;
 }) {
   const { page, profile, taste, communities, spec, date, id } = input;
+  const pagesRead = input.pagesRead ?? 1;
+  const scope = pagesRead > 1 ? `whole website · ${pagesRead} pages read` : "this page only";
   const clean = (label: string) => spec.place_labels.find((p) => p.raw === label)?.clean ?? label;
   const primary = taste.markets[0] ?? "";
   const host = new URL(page.url).hostname.replace(/^www\./, "");
@@ -121,7 +124,7 @@ export function renderReport(input: {
     <li>Everything depends on how we read your page and which starting points we matched in Qloo (section 02).</li>
     <li>Affinity scores run from 0 to 1 and compare against everyone else. Demographic leans run from −1 to +1; 0 is average.</li>
     <li>Community sizes and rules change; check them before you post or spend. Links were checked on ${esc(date)}.</li>
-    <li>No personal data was sent to Qloo. Only the public content of your page was analysed, and your email never left our side.</li>
+    <li>No personal data was sent to Qloo. Only the public content of your page was analysed.</li>
   </ul></div>`));
 
   const icon = page.image
@@ -146,7 +149,7 @@ export function renderReport(input: {
     <div class="app">${icon}<div>
       <div class="eyebrow">Audience report for</div>
       <h1>${esc(profile.name)}</h1>
-      <div class="meta">${esc(host)} · scope: this page only · markets: ${esc(taste.markets.join(", "))}</div>
+      <div class="meta">${esc(host)} · scope: ${esc(scope)} · markets: ${esc(taste.markets.join(", "))}</div>
     </div></div>
   </div>
 </header>
@@ -208,7 +211,7 @@ a{color:var(--web);text-underline-offset:3px}
 .logo{font-family:var(--display);font-weight:600;font-size:23px;letter-spacing:-.025em;display:flex;align-items:center;gap:10px;color:#fff}
 .logo svg{width:30px;height:36px;color:#fff}
 .app{display:flex;gap:24px;align-items:center;margin-top:56px}
-.app img,.mono-icon{width:104px;height:104px;border-radius:24px;box-shadow:0 20px 40px -16px rgba(0,0,0,.7);flex:none;object-fit:cover}
+.app img,.mono-icon{width:104px;height:104px;border-radius:24px;box-shadow:0 20px 40px -16px rgba(0,0,0,.7);flex:none;object-fit:contain;background:#000}
 .mono-icon{display:grid;place-items:center;background:linear-gradient(135deg,#0e5e63,#e2552d);font-family:var(--display);font-weight:700;font-size:52px}
 .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6)}
 h1{font-family:var(--display);font-weight:600;font-size:clamp(36px,6vw,72px);letter-spacing:-.04em;line-height:1.02;margin:6px 0 10px}

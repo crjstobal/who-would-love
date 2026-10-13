@@ -9,8 +9,7 @@ ad targeting ready to paste into Meta Ads and Reddit Ads.
 
 Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/) (deadline 2026-10-30, 23:45 EDT).
 
-> Status (2026-10-11): the full pipeline runs locally end to end and produces a real report.
-> Next: the web app (form, background job, email) on Cloudflare.
+> Status (2026-10-13): live at https://whowouldlove.javi.link (sample report: /r/momentline).
 
 ## How it works
 
@@ -21,7 +20,8 @@ Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/) (deadline 2026
    affinities (what else these people love), demographics and where the taste is popular.
 3. **Find the doors.** The agent searches the open web for the communities where those people
    gather (subreddits, newsletters, podcasts) and builds ready-to-paste ad targeting.
-4. **Report.** An HTML/PDF report is emailed to the user. No signup and no payment step.
+4. **Report.** The report is built while the user watches a progress page, and lives at its own
+   link (`/r/<id>`). No signup, no email and no payment step.
 
 Every claim in the report carries one of three labels, and the report can be filtered by them:
 
@@ -54,21 +54,34 @@ searches; Qloo is free during the hackathon).
 
 Open the HTML files directly in a browser; they have no build step.
 
-## Planned stack
+## Architecture
 
-- **Hosting:** Cloudflare Workers, with Workflows or Queues for the background job (a report takes
-  a few minutes). Workers cannot spawn the `qloo mcp` process from the official kit, so Qloo is
-  called through its REST API, wrapped as tools the agent can call.
-- **Model:** Claude Opus 5.5 (`claude-opus-5-5`) through the Anthropic API. Note: forced
-  `tool_choice` returns 400 on this model, and thinking cannot be disabled (use `effort`).
-- **Page reading:** Firecrawl.
-- **Email:** to be decided (Amazon SES or Resend).
+```
+browser ── whowouldlove.javi.link (Cloudflare Pages: web/)
+              │  /api/*  and  /r/<id>   (Pages Functions, service binding)
+              ▼
+          who-would-love-api (Worker: api/)  ── D1 "who-would-love" (reports, progress, HTML)
+              │
+              └─ Workflow "who-would-love-report": one durable, retried step per stage
+                   Firecrawl ─ Claude Opus 5.5 ─ Qloo ─ Claude + web search ─ Claude ─ render
+```
+
+- `src/`: the pipeline, shared by the Worker and the local runner.
+- `api/`: Worker with the HTTP API (create report, status, HTML) and the Workflow.
+- `web/`: static site (home, progress page, about) and two Pages Functions.
+- The API has no public URL; only the website reaches it, through a service binding.
+- Abuse and cost limits: 3 reports per IP per day, 25 per day in total, and a finished report for
+  the same link is reused for 30 days.
+
+Deploy with `scripts/deploy.sh [secrets|api|web|all]`. It reads the keys from AWS SSM and pipes
+them to `wrangler secret bulk`; nothing is written to disk. The D1 schema is in `api/schema.sql`.
 
 ## Secrets
 
-No `.env` files in this repository. Keys live in AWS SSM Parameter Store and are read at runtime:
+No `.env` files in this repository. Keys live in AWS SSM Parameter Store and are read at runtime
+(`scripts/with-secrets.sh <command>` runs any command with them in its environment):
 
-- `/servikaki/secrets/whowouldlove.env`: `ANTHROPIC_API_KEY`
+- `/servikaki/secrets/whowouldlove.env`: `ANTHROPIC_API_KEY`, `IP_SALT`, optional `TURNSTILE_SECRET`
 - `/servikaki/secrets/firecrawl.env`: `FIRECRAWL_API_KEY` (1,000 credits a month, so "whole website"
   mode must cap the number of pages)
 - `/servikaki/secrets/qloo.env`: `QLOO_API_URL`, `QLOO_API_KEY`
@@ -83,8 +96,10 @@ The `qloo` CLI reads `QLOO_API_KEY` from the environment, so `qloo setup --qloo`
 - [x] Audience segments, Qloo seeds checked by the model, affinities, demographics, places.
 - [x] Community search with web search and link checks.
 - [x] Report writing and HTML rendering.
-- [ ] Web app: form, background job, email delivery, Cloudflare deployment.
-- [ ] "Whole website" mode (Firecrawl map + a capped number of pages).
+- [x] Web app on Cloudflare: form, background Workflow, progress page, report page.
+- [x] "Whole website" mode (Firecrawl map, home page plus up to 4 key pages).
+- [ ] Upgrade Cloudflare to Workers Paid (the free plan allows only 50 subrequests per run).
+- [ ] Optional: Turnstile captcha (needs a widget created in the dashboard), email delivery.
 - [ ] Before making the repo public: check history for secrets with
       `git log -p | grep -iE 'api[_-]?key|secret|token'`.
 
