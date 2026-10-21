@@ -3,7 +3,7 @@
 **Paste a link and discover who would love your app, product, service or game.**
 
 Who Would Love reads a product page (or a whole website), matches it against real cultural taste
-data from [Qloo](https://www.qloo.com/), and emails back an audience report: who the audience is,
+data from [Qloo](https://www.qloo.com/), and builds an audience report on the spot: who the audience is,
 what else they love, where they live, and the communities where you can actually reach them, with
 ad targeting ready to paste into Meta Ads and Reddit Ads.
 
@@ -100,6 +100,7 @@ The `qloo` CLI reads `QLOO_API_KEY` from the environment, so `qloo setup --qloo`
 - [x] "Whole website" mode (Firecrawl map, home page plus up to 4 key pages).
 - [ ] Upgrade Cloudflare to Workers Paid (the free plan allows only 50 subrequests per run).
 - [ ] Optional: Turnstile captcha (needs a widget created in the dashboard), email delivery.
+- Judges can skip the daily limits with the code given in the Devpost testing instructions.
 - [ ] Before making the repo public: check history for secrets with
       `git log -p | grep -iE 'api[_-]?key|secret|token'`.
 
@@ -118,7 +119,7 @@ and the [official kit](https://github.com/qloo/qloo-hackathon-kit), read 2026-10
 - Do not use the legacy `/recs` or `/recommendations` endpoints. Invalid parameters are ignored
   silently (empty result, no error).
 - Server-side caching is allowed; never commit Qloo responses to a public repository.
-- Never send personal data (emails, names, device IDs) to Qloo. The user's email stays on our side.
+- Never send personal data (emails, names, device IDs) to Qloo. We do not collect any.
 - The key is deactivated after judging ends (2026-11-16).
 - Support: Qloo hackathon Discord, `#api-help`.
 - Findings from our own tests (2026-10-11):

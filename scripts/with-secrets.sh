@@ -11,6 +11,7 @@ WWL=$(ssm whowouldlove.env); FC=$(ssm firecrawl.env); QL=$(ssm qloo.env); CF=$(s
 export ANTHROPIC_API_KEY=$(val "$WWL" ANTHROPIC_API_KEY)
 export TURNSTILE_SECRET=$(val "$WWL" TURNSTILE_SECRET)
 export IP_SALT=$(val "$WWL" IP_SALT)
+export JUDGE_CODE=$(val "$WWL" JUDGE_CODE)
 export FIRECRAWL_API_KEY=$(val "$FC" FIRECRAWL_API_KEY)
 export QLOO_API_KEY=$(val "$QL" QLOO_API_KEY)
 export CLOUDFLARE_API_TOKEN=$(val "$CF" CLOUDFLARE_API_TOKEN)

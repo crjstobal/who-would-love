@@ -281,10 +281,10 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
           <div id="ts" class="ts"></div>
           <button class="go" id="go" type="submit">Find who would love it <span>→</span></button>
           <p class="err" id="err" role="alert"></p>
-          <p class="fine">No signup, no email. It takes about six minutes; you can leave and come back to the same link.</p>
+          <p class="fine">No signup, no email. It takes about eight minutes; you can leave and come back to the same link.</p>
         </div>
       </form>
-      <div class="proof"><span>No signup</span><span>Report in about 6 minutes</span><span>Ready-to-paste ad targeting</span></div>
+      <div class="proof"><span>No signup</span><span>Report in about 8 minutes</span><span>Ready-to-paste ad targeting</span></div>
     </div>
   </div>
 </div>
@@ -355,7 +355,7 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
   <div class="kicker">FAQ</div>
   <h2>Questions</h2>
   <div class="faq">
-    <details><summary>Do I need an account?</summary><p>No. Paste a link, wait about six minutes, read your report. Each report gets its own link you can share.</p></details>
+    <details><summary>Do I need an account?</summary><p>No. Paste a link, wait about eight minutes, read your report. Each report gets its own link you can share.</p></details>
     <details><summary>What is Qloo?</summary><p>A cultural intelligence company whose taste graph covers hundreds of millions of artists, films, books, brands, places and more. We use it to ground the report in real affinity data instead of guesses.</p></details>
     <details><summary>Page or whole website?</summary><p>Pick "just this page" for a store listing or a single product. Pick "the whole website" when your home page alone does not explain what you do.</p></details>
     <details><summary>Is my data shared?</summary><p>Only the public content of your page is analysed. We do not ask for your email or any personal data, and nothing personal is ever sent to Qloo.</p></details>
@@ -412,6 +412,9 @@ document.querySelectorAll('input[name=scope]').forEach(r=>r.addEventListener('ch
 
 /* turnstile (invisible captcha), loaded only if the API gives us a site key */
 let tsToken='', tsWidget=null;
+/* judge access code: ?code=... is remembered on this device and sent with each request */
+let judgeCode='';
+try{const c=new URLSearchParams(location.search).get('code');if(c)localStorage.setItem('wwl-code',c);judgeCode=localStorage.getItem('wwl-code')||'';}catch(e){}
 fetch('/api/config').then(r=>r.json()).then(c=>{
   if(!c.turnstileSiteKey||c.turnstileSiteKey==='REPLACE_ME') return;
   window.onTs=()=>{tsWidget=turnstile.render('#ts',{sitekey:c.turnstileSiteKey,size:'flexible',appearance:'interaction-only',callback:t=>tsToken=t,'expired-callback':()=>tsToken=''})};
@@ -426,7 +429,7 @@ async function send(e){
     const r=await fetch('/api/reports',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       url:document.getElementById('url').value.trim(),
       scope:document.querySelector('input[name=scope]:checked').value,
-      token:tsToken})});
+      token:tsToken,code:judgeCode})});
     const d=await r.json();
     if(!r.ok) throw new Error(d.error||'Something went wrong. Please try again.');
     location.href='/r/'+d.id;

@@ -8,7 +8,7 @@ what=${1:-all}
 if [[ $what == secrets || $what == all ]]; then
   scripts/with-secrets.sh bash -c '
     node -e "process.stdout.write(JSON.stringify(Object.fromEntries(
-      [\"ANTHROPIC_API_KEY\",\"FIRECRAWL_API_KEY\",\"QLOO_API_KEY\",\"TURNSTILE_SECRET\",\"IP_SALT\"]
+      [\"ANTHROPIC_API_KEY\",\"FIRECRAWL_API_KEY\",\"QLOO_API_KEY\",\"TURNSTILE_SECRET\",\"IP_SALT\",\"JUDGE_CODE\"]
         .filter(k => process.env[k]).map(k => [k, process.env[k]]))))" |
     npx wrangler secret bulk --config api/wrangler.jsonc'
 fi

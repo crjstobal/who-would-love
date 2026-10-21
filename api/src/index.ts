@@ -22,6 +22,7 @@ export interface Env {
   TURNSTILE_SECRET: string;
   TURNSTILE_SITE_KEY: string;
   IP_SALT: string;
+  JUDGE_CODE?: string;
   DAILY_CAP: string;
   PER_IP_DAILY_CAP: string;
 }
@@ -154,7 +155,7 @@ async function turnstileOk(env: Env, token: unknown, ip: string) {
 }
 
 async function createReport(request: Request, env: Env) {
-  const body = (await request.json().catch(() => ({}))) as { url?: string; scope?: string; token?: string };
+  const body = (await request.json().catch(() => ({}))) as { url?: string; scope?: string; token?: string; code?: string };
   const url = cleanUrl(body.url);
   if (!url) return json({ error: "Please paste a full public link, starting with https://" }, 400);
   const scope = body.scope === "site" ? "site" : "page";
@@ -167,11 +168,13 @@ async function createReport(request: Request, env: Env) {
   if (recent) return json({ id: recent.id, reused: true });
 
   const ipHash = await sha256(`${env.IP_SALT}:${ip}`);
+  // Judges get unrestricted access (a rules requirement) with the code from the testing instructions.
+  const judge = !!env.JUDGE_CODE && body.code === env.JUDGE_CODE;
   const since = Date.now() - DAY;
   const counts = await env.DB.prepare("SELECT COUNT(*) AS total, SUM(CASE WHEN ip_hash=? THEN 1 ELSE 0 END) AS mine FROM reports WHERE created_at>?")
     .bind(ipHash, since).first<{ total: number; mine: number | null }>();
-  if ((counts?.mine ?? 0) >= Number(env.PER_IP_DAILY_CAP)) return json({ error: "You have used today's free reports. Come back tomorrow, or open the sample report in the meantime." }, 429);
-  if ((counts?.total ?? 0) >= Number(env.DAILY_CAP)) return json({ error: "We have hit today's limit of free reports (each one runs real AI and data queries). Please try again tomorrow, or open the sample report." }, 429);
+  if (!judge && (counts?.mine ?? 0) >= Number(env.PER_IP_DAILY_CAP)) return json({ error: "You have used today's free reports. Come back tomorrow, or open the sample report in the meantime." }, 429);
+  if (!judge && (counts?.total ?? 0) >= Number(env.DAILY_CAP)) return json({ error: "We have hit today's limit of free reports (each one runs real AI and data queries). Please try again tomorrow, or open the sample report." }, 429);
 
   const id = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
   const now = Date.now();
