@@ -98,11 +98,10 @@ The `qloo` CLI reads `QLOO_API_KEY` from the environment, so `qloo setup --qloo`
 - [x] Report writing and HTML rendering.
 - [x] Web app on Cloudflare: form, background Workflow, progress page, report page.
 - [x] "Whole website" mode (Firecrawl map, home page plus up to 4 key pages).
-- [ ] Upgrade Cloudflare to Workers Paid (the free plan allows only 50 subrequests per run).
+- [x] Cloudflare Workers Paid (the free plan allows only 50 subrequests per run, a report needs about 200).
 - [ ] Optional: Turnstile captcha (needs a widget created in the dashboard), email delivery.
 - Judges can skip the daily limits with the code given in the Devpost testing instructions.
-- [ ] Before making the repo public: check history for secrets with
-      `git log -p | grep -iE 'api[_-]?key|secret|token'`.
+- [x] History checked for secrets before making the repo public (2026-10-21).
 
 ## Qloo API notes
 
