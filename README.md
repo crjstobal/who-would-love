@@ -1,5 +1,8 @@
 # Who Would Love
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Live demo](https://img.shields.io/badge/demo-whowouldlove.javi.link-ff6a3d.svg)](https://whowouldlove.javi.link)
+
 **Paste a link and discover who would love your app, product, service or game.**
 
 Who Would Love reads a product page (or a whole website), matches it against real cultural taste
