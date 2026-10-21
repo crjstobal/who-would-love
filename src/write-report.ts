@@ -41,7 +41,8 @@ Ground rules:
 - When you pick Qloo entities, copy their entity_id exactly from that segment's lists (mainstream, niche or in_market). Prefer specific and niche picks that a maker can act on (target, sponsor, reference in an ad) over household names everyone likes.
 - Leave out political, religious and adult entities and communities, even if Qloo returns them.
 - Only pick communities from the list you are given, by exact name. Prefer ones whose link was confirmed.
-- Be concrete and short. No hype, no filler. No em dashes.`;
+- Describe demographic leans by their size: under 0.15 is no real lean (say so), 0.15 to 0.35 is a slight lean, above 0.35 is a clear lean. Never call a weak lean "clear".
+- Be concrete and short. No hype, no filler. No em dashes. Write as "we", never "I".`;
 
 function compactTaste(t: TasteData) {
   const brief = (l: { entity_id: string; name: string; affinity: number }[]) => l.map((a) => ({ id: a.entity_id, name: a.name, affinity: a.affinity }));

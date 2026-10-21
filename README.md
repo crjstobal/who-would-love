@@ -114,7 +114,7 @@ and the [official kit](https://github.com/qloo/qloo-hackathon-kit), read 2026-10
   `filter.type` plus signals such as `signal.interests.entities`, `signal.interests.tags` or
   `signal.demographics.audiences`.
 - Entity types: artist, book, brand, destination, movie, person, place, podcast, tv_show,
-  video_game.
+  videogame (written without an underscore; `video_game` is rejected).
 - Do not use the legacy `/recs` or `/recommendations` endpoints. Invalid parameters are ignored
   silently (empty result, no error).
 - Server-side caching is allowed; never commit Qloo responses to a public repository.

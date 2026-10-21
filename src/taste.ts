@@ -10,8 +10,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { MODEL, type ProductProfile } from "./read-product.js";
 import type { Qloo } from "./qloo.js";
 
-// video_game is not accepted by /v2/insights in the hackathon environment.
-const AFFINITY_TYPES = ["brand", "book", "movie", "tv_show", "podcast", "artist", "person", "destination"] as const;
+const AFFINITY_TYPES = ["brand", "book", "movie", "tv_show", "podcast", "artist", "person", "videogame", "destination"] as const;
 // Popularity band for the niche list: high enough to be real, low enough to skip household names.
 const NICHE = { min: 0.3, max: 0.9 };
 
@@ -71,10 +70,11 @@ export async function resolveSeeds(profile: ProductProfile, qloo: Qloo, claude: 
   for (const seg of profile.segments) for (const s of seg.seeds) if (!unique.has(seedKey(s))) unique.set(seedKey(s), s);
 
   const entityCandidates = await Promise.all([...unique.entries()].map(async ([key, s]) => ({
-    key, seed: s, candidates: ((await qloo.search(s.name, `urn:entity:${s.type}`)).results ?? []).map(candidate) as Candidate[],
+    // A failed lookup only drops that seed (it is reported as rejected), never the whole report.
+    key, seed: s, candidates: ((await qloo.search(s.name, `urn:entity:${s.type}`).catch(() => ({}))).results ?? []).map(candidate) as Candidate[],
   })));
   const tagCandidates = await Promise.all(profile.qloo_tag_queries.map(async (q) => ({
-    query: q, candidates: (((await qloo.tags(q)).results?.tags) ?? []).map((t: any) => ({ id: t.id, name: t.name, type: t.type })),
+    query: q, candidates: (((await qloo.tags(q).catch(() => ({}))).results?.tags) ?? []).map((t: any) => ({ id: t.id, name: t.name, type: t.type })),
   })));
 
   const response = await claude.messages.parse({

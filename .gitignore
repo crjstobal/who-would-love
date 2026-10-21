@@ -6,3 +6,6 @@ __pycache__/
 .wrangler/
 .dev.vars
 runs/
+
+# Private working notes (Spanish, strategy). Not for the public repo.
+CLAUDE.md

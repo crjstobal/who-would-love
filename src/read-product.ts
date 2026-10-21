@@ -10,7 +10,7 @@ import type { ScrapedPage } from "./firecrawl.js";
 export const MODEL = "claude-opus-5-5";
 
 export const QLOO_ENTITY_TYPES = [
-  "artist", "book", "brand", "destination", "movie", "person", "place", "podcast", "tv_show", "video_game",
+  "artist", "book", "brand", "destination", "movie", "person", "place", "podcast", "tv_show", "videogame",
 ] as const;
 
 export const ProductProfile = z.object({

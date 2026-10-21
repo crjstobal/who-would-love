@@ -11,7 +11,7 @@ const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "
 const pad = (n: number) => String(n).padStart(2, "0");
 
 const TYPE_LABEL: Record<string, string> = {
-  brand: "Brand", book: "Book", movie: "Film", tv_show: "TV", podcast: "Podcast", artist: "Music", person: "Person", destination: "Destination",
+  brand: "Brand", book: "Book", movie: "Film", tv_show: "TV", podcast: "Podcast", artist: "Music", person: "Person", videogame: "Game", destination: "Destination", place: "Place",
 };
 const AGE_LABEL: Record<string, string> = {
   "24_and_younger": "Under 25", "25_to_29": "25–29", "30_to_34": "30–34", "35_to_44": "35–44", "45_to_54": "45–54", "55_and_older": "55+",

@@ -36,7 +36,8 @@ Rules:
 - Give sizes only if you found them; otherwise null. Never guess numbers.
 - Avoid political, religious and adult communities.
 - Prefer a mix of platforms. Include at least a few subreddits when they exist.
-- For each place, say how a maker should approach it honestly (many subreddits ban self-promotion).`;
+- For each place, say how a maker should approach it honestly (many subreddits ban self-promotion).
+- Write as "we", never "I". No em dashes.`;
 
 function topNames(seg: SegmentTaste, n = 4) {
   return Object.entries(seg.affinities).map(([type, l]) => `${type}: ${[...l.mainstream.slice(0, n), ...l.niche.slice(0, 2)].map((a) => a.name).join(", ")}`).join("\n");
