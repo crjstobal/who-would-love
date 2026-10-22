@@ -182,6 +182,33 @@ h2{font-family:var(--display);font-weight:600;font-size:clamp(38px,5vw,68px);lin
 .fun img{width:38px;height:38px;border-radius:10px}
 .fun b{color:var(--ink)}
 /* provenance */
+.adsdemo{padding:30px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:22px;align-items:center;background:linear-gradient(180deg,#fff,#f7f5f9)}
+.adf{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:13.5px;box-shadow:0 20px 40px -24px rgba(21,18,27,.45)}
+.adf-top{display:flex;gap:9px;align-items:center;padding:11px 13px}.adf-top img{width:30px;height:30px;border-radius:8px}
+.adf-top b{display:block;font-size:13.5px}.adf-top small{color:var(--ink-3);font-size:11.5px}
+.adf-text{padding:0 13px 11px;line-height:1.4}
+.adf-art{aspect-ratio:1/1;background:#2B2A3D;color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:18px}
+.adf-art img{width:46%;align-self:center;margin-top:8%;border-radius:22%;box-shadow:0 20px 40px -10px rgba(0,0,0,.6)}
+.adf-art span{font-family:var(--display);font-weight:600;font-size:20px;line-height:1.15;letter-spacing:-.02em}
+.adf-bot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:11px 13px;background:#f4f2f6}
+.adf-bot small{display:block;color:var(--ink-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}.adf-bot b{font-size:13px}
+.adf-bot > span{background:#F2C38B;color:#15121b;font-weight:600;font-size:12.5px;padding:7px 11px;border-radius:8px;white-space:nowrap}
+.adside .kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:10px}
+.evq{display:flex;align-items:baseline;gap:8px;background:#e3f1ec;border-radius:10px;padding:7px 11px;margin-bottom:7px;font-size:14px}
+.evq small{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:#1f6f5c}.evq b{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:#1f6f5c}
+.adside p{font-size:14px;color:var(--ink-2);margin-top:12px;line-height:1.5}
+.adside .ok{display:inline-block;margin-top:14px;font-size:12.5px;font-weight:600;color:#2f7a63;background:#e6f3ee;padding:5px 11px;border-radius:999px}
+.why2{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:40px;font-size:19px;color:var(--ink-2);line-height:1.6}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+.tiers a{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:28px;transition:transform .25s,box-shadow .25s}
+.tiers a:hover{transform:translateY(-3px);box-shadow:0 18px 30px -18px rgba(21,18,27,.35)}
+.tiers a.pop{background:var(--night);color:#fff;border-color:var(--night)}
+.tiers span{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.tiers .pop span,.tiers .pop p{color:rgba(255,255,255,.7)}
+.tiers b{display:block;font-family:var(--display);font-weight:600;font-size:44px;letter-spacing:-.04em;margin-top:10px}
+.tiers b small{font-family:var(--sans);font-size:15px;font-weight:500;letter-spacing:0;opacity:.6}
+.tiers p{color:var(--ink-2);margin-top:6px}
+.tiers-more{margin-top:22px;font-weight:600}.tiers-more a{color:var(--accent-2);text-decoration:none}
 .prov{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px}
 .prov div{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:30px}
 .tag{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:500;padding:5px 10px;border-radius:999px;color:#fff}
@@ -216,7 +243,9 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
   .hero{padding:64px 18px 40px;border-radius:24px}
   .row,.row.flip{grid-template-columns:1fr;gap:28px;margin-top:64px}
   .row.flip .txt{order:0}
-  .prov,.faq,.places{grid-template-columns:1fr}
+  .prov,.faq,.places,.why2,.tiers,.adsdemo{grid-template-columns:1fr}
+  .adsdemo{padding:18px}
+  .why2{gap:16px;font-size:17px}
   .place.wide{grid-column:auto}
   .fgrid{grid-template-columns:1fr 1fr}
   .navlinks a:not(.cta){display:none}
@@ -245,7 +274,7 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
 <div class="wrap">
   <nav>
     <a class="logo" href="#"><svg aria-hidden="true"><use href="#mark"/></svg>Who Would Love</a>
-    <div class="navlinks"><a href="#how">How it works</a><a href="/reports">Sample reports</a><a href="#faq">FAQ</a><a class="cta" href="#start">Try it free</a></div>
+    <div class="navlinks"><a href="#how">How it works</a><a href="/reports">Sample reports</a><a href="/pricing">Pricing</a><a href="#faq">FAQ</a><a class="cta" href="#start">Try it free</a></div>
   </nav>
 
   <div class="hero" id="start">
@@ -260,7 +289,7 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
     <div class="hero-in">
       <h1>Paste a link and discover<br>who would love<span class="rot" id="rot"></span></h1>
       
-      <p class="lede">We read your page, match it against real cultural taste data from Qloo, and build you a report: who your audience is, what else they love, and the communities where you can actually reach them.</p>
+      <p class="lede">We read your page, match it against real cultural taste data from Qloo, and build you a report: who your audience is, what else they love, where you can actually reach them, and the ads to say it.</p>
 
       <form class="form" id="f" onsubmit="send(event);return false">
         <div id="fields">
@@ -284,14 +313,14 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
           <p class="fine">No signup, no email. It takes about eight minutes; you can leave and come back to the same link.</p>
         </div>
       </form>
-      <div class="proof"><span>No signup</span><span>Report in about 8 minutes</span><span>Ready-to-paste ad targeting</span></div>
+      <div class="proof"><span>No signup</span><span>Report in about 8 minutes</span><span>Ads written for each audience</span></div>
     </div>
   </div>
 </div>
 
 <section id="how"><div class="wrap">
   <div class="kicker">How it works</div>
-  <h2>From a link to a list of places to advertise.</h2>
+  <h2>From a link to ads that land.</h2>
   <p class="sub">Most makers advertise where everyone in their category already does. The interesting audience is usually one step sideways. Here is the whole trip, using a real app: Momentline.</p>
 
   <div class="row">
@@ -339,6 +368,46 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
       <div class="place wide"><span class="ico fb">f</span><div style="flex:1"><span class="kind">Meta Ads interests</span><b>Ready to paste</b><div class="paste">Long-distance relationship, Bullet journal, Bon Iver, Sufjan Stevens, Brené Brown</div></div></div>
     </div>
   </div>
+
+  <div class="row flip">
+    <div class="txt"><div class="n">04</div><h3>We write the ads</h3><p>A creative agent turns each audience's taste into ads: three concepts with feed and story mockups, a Reddit post, a podcast read, and versions for the cities where taste really differs. A critic agent sends back anything that cites data we do not have, overpromises, or leans on a stereotype.</p><p class="note">A real ad from <a href="/r/momentline">our Momentline report</a>, approved by the critic on the first draft.</p></div>
+    <div class="stage adsdemo">
+      <div class="adf">
+        <div class="adf-top"><img src="assets/momentline-icon.jpg" alt=""><div><b>Momentline: Day Counter</b><small>Sponsored</small></div></div>
+        <p class="adf-text">An anniversary counts up. A trip counts down. A birthday does both, every year.</p>
+        <div class="adf-art"><img src="assets/momentline-icon.jpg" alt=""><span>412 days since our first date. 9 days until I see you.</span></div>
+        <div class="adf-bot"><div><small>apps.apple.com</small><b>Count up. Count down. Same line.</b></div><span>Download</span></div>
+      </div>
+      <div class="adside">
+        <span class="kind">Why it lands, from Qloo</span>
+        <div class="evq"><small>Film</small>Love, Rosie<b>0.91</b></div>
+        <div class="evq"><small>Music</small>Bon Iver<b>0.97</b></div>
+        <div class="evq"><small>Podcast</small>Where Should We Begin? with Esther Perel<b>0.90</b></div>
+        <p>Bittersweet, years-spanning love stories and hushed indie-folk: so the ad shows one real pair of dates, not a feature list.</p>
+        <span class="ok">✓ Approved by the critic agent</span>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section id="why-taste"><div class="wrap">
+  <div class="kicker">Why taste</div>
+  <h2>Billboards already work this way.</h2>
+  <div class="why2">
+    <p>Since 2020, JCDecaux, one of the world's largest outdoor advertising companies, has used Qloo's taste data to plan hyper-local campaigns: which ad runs on which screen, neighbourhood by neighbourhood. Qloo reports a 10x improvement in targeting ROI.</p>
+    <p>Who Would Love brings the same idea to one maker with one product. The audience comes from what people love, not from age and gender, and every ad is written from that taste, down to the city. <a href="https://www.qloo.com/resources/client-stories/jcdecaux-out-of-home-targeting" target="_blank" rel="noopener">Read the JCDecaux story</a></p>
+  </div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <div class="kicker">Pricing</div>
+  <h2>Free for now. Priced for makers after.</h2>
+  <div class="tiers">
+    <a href="/pricing"><span>Launch report</span><b>$39<small> once</small></b><p>One product: the report and its ad kit.</p></a>
+    <a href="/pricing" class="pop"><span>Studio</span><b>$99<small> / month</small></b><p>5 reports a month, refreshed monthly, plus an ad check.</p></a>
+    <a href="/pricing"><span>Agency</span><b>$299<small> / month</small></b><p>25 reports, your brand, your team.</p></a>
+  </div>
+  <p class="tiers-more"><a href="/pricing">See the plans and the numbers behind them →</a></p>
 </div></section>
 
 <section><div class="wrap">
@@ -359,8 +428,9 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
     <details><summary>What is Qloo?</summary><p>A cultural intelligence company whose taste graph covers hundreds of millions of artists, films, books, brands, places and more. We use it to ground the report in real affinity data instead of guesses.</p></details>
     <details><summary>Page or whole website?</summary><p>Pick "just this page" for a store listing or a single product. Pick "the whole website" when your home page alone does not explain what you do.</p></details>
     <details><summary>Is my data shared?</summary><p>Only the public content of your page is analysed. We do not ask for your email or any personal data, and nothing personal is ever sent to Qloo.</p></details>
-    <details><summary>Can I use this for Facebook or Reddit ads?</summary><p>Yes. The report ends with interest lists and communities formatted to paste into ad managers.</p></details>
-    <details><summary>Why is it free?</summary><p>It is a demo built for the Qloo Agentic Hackathon. Each report runs real AI and data queries, so there is a small daily limit.</p></details>
+    <details><summary>Can I use this for Facebook or Reddit ads?</summary><p>Yes. Each audience comes with an ad kit: three ad concepts with feed and story mockups, a Reddit post and a podcast host-read, plus interest lists and communities formatted to paste into ad managers.</p></details>
+    <details><summary>Who checks the ads?</summary><p>A second AI agent, the critic. It rejects any ad that cites taste data we do not have, makes a claim your page does not support, implies an endorsement, or leans on a stereotype instead of real taste. The writer fixes every issue before you see the kit.</p></details>
+    <details><summary>Why is it free?</summary><p>It is a demo built for the Qloo Agentic Hackathon. Each report runs real AI and data queries, so there is a small daily limit. Here is <a href="/pricing">how we would price it</a> after the hackathon.</p></details>
     <details><summary>How accurate is it?</summary><p>Qloo data describes what groups of fans tend to like. It is a strong starting point for testing, not a guarantee of who will buy.</p></details>
   </div>
 
@@ -374,7 +444,7 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
 <footer><div class="wrap">
   <div class="fgrid">
     <div><a class="logo" href="#"><svg aria-hidden="true"><use href="#mark"/></svg>Who Would Love</a><p class="tl">Audience reports for people who make things. Taste data by Qloo.</p></div>
-    <div><h4>Product</h4><ul><li><a href="#how">How it works</a></li><li><a href="/reports">Sample reports</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+    <div><h4>Product</h4><ul><li><a href="#how">How it works</a></li><li><a href="/reports">Sample reports</a></li><li><a href="/pricing">Pricing</a></li><li><a href="#faq">FAQ</a></li></ul></div>
     <div><h4>Resources</h4><ul><li><a href="/about#method">Methodology</a></li><li><a href="https://github.com/crjstobal/who-would-love">Source code</a></li><li><a href="/reports">Sample reports</a></li></ul></div>
     <div><h4>Legal</h4><ul><li><a href="/about#privacy">Privacy</a></li><li><a href="/about#terms">Terms</a></li><li><a href="mailto:hi@javi.link">Contact</a></li></ul></div>
   </div>

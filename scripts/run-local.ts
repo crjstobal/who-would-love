@@ -14,7 +14,9 @@ import { allSeedIds, gatherOverall, resolveSeeds, type SegmentTaste, type TasteD
 import { investigateSegment } from "../src/taste-agent.js";
 import { findCommunities, type Community } from "../src/communities.js";
 import { writeReport, type ReportSpec } from "../src/write-report.js";
-import { renderReport } from "../src/render.js";
+import { ADS_MARKER, renderReport } from "../src/render.js";
+import { makeAdKit, type KitResult } from "../src/ads.js";
+import { renderAdKit } from "../src/render-ads.js";
 
 function ssmEnv(name: string): Record<string, string> {
   const raw = execFileSync("aws", [
@@ -110,7 +112,17 @@ const spec = await step<ReportSpec>(`${dir}/04-spec.json`, "4. Write report (Opu
   console.log(`    ${charge(r.usage)}`);
   return r.spec;
 });
+const kits = await step<{ segment: string; result: KitResult }[]>(`${dir}/05-ads.json`, "5. Ad kits (creative + critic agents)", async () => {
+  const labels = Object.fromEntries(spec.place_labels.map((p) => [p.raw, p.clean]));
+  const runs = await Promise.all(taste.segments.map((seg) => makeAdKit(profile, seg, spec, communities, labels, qloo, claude)));
+  return runs.map((r, i) => {
+    console.log(`    ${taste.segments[i].name}: ${r.result.approved ? "approved" : "NOT approved"} after ${r.result.reviews} draft(s), ${r.result.trail.length} steps, ${charge(r.usage)}`);
+    for (const s of r.result.trail) console.log(`      ${s.tool} ${s.ask} -> ${s.saw.slice(0, 160)}`);
+    return { segment: taste.segments[i].name, result: r.result };
+  });
+});
 const date = new Date().toISOString().slice(0, 10);
 const id = "WWL-" + dir.split("-").pop()!.slice(-6);
-writeFileSync(`${dir}/report.html`, renderReport({ page, profile, taste, communities, spec, date, id }));
+const brand = { name: profile.name, host: new URL(page.url).hostname.replace(/^www\./, ""), image: page.image ?? null };
+writeFileSync(`${dir}/report.html`, renderReport({ page, profile, taste, communities, spec, date, id }).replace(ADS_MARKER, () => renderAdKit(kits, brand)));
 console.log(`5. Rendered ${dir}/report.html. Spent this run: about $${spent.toFixed(2)}`);

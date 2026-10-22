@@ -45,6 +45,15 @@ li small{font-family:var(--mono);font-size:12px;color:var(--ink-3);font-weight:4
 .keep{margin-top:22px;background:var(--soft);border-radius:14px;padding:14px 16px;font-size:14.5px;color:var(--ink-2);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .keep code{font-family:var(--mono);font-size:13px;color:var(--ink);overflow-wrap:anywhere}
 .keep button{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 12px;cursor:pointer}
+.agent{display:none;margin-top:22px;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.agent h3{font-size:13px;font-family:var(--mono);font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+.agent h3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+.act{padding:10px 0;border-bottom:1px solid var(--soft);font-size:14.5px;animation:in .4s ease}
+.act:last-child{border-bottom:0}
+.act b{font-weight:600}.act .seg{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);display:block}
+.act .why{color:var(--ink-2);font-size:13.5px;margin-top:2px}
+@keyframes in{from{opacity:0;transform:translateY(-4px)}}
 .fail{display:none;margin-top:6px}
 .fail h2{font-family:var(--display);font-weight:600;font-size:26px;letter-spacing:-.02em}
 .fail p{color:var(--ink-2);margin-top:8px}
@@ -70,6 +79,7 @@ li small{font-family:var(--mono);font-size:12px;color:var(--ink-3);font-weight:4
     <div id="live">
       <div class="bar"><i id="fill"></i></div>
       <ol id="steps"></ol>
+      <div class="agent" id="agent"><h3>What the agent is doing</h3><div id="acts"></div></div>
       <div class="meta"><span>Elapsed <b id="clock">0:00</b></span><span>Usually about 8 minutes</span></div>
       <div class="keep"><span>You can close this tab. Your report will be here: <code id="link"></code></span><button type="button" id="copy">Copy link</button></div>
     </div>
@@ -100,9 +110,27 @@ async function poll(){
     if(d.status==='failed'){fail(d.error||'Something went wrong on our side.');return;}
     const n=d.steps.length;
     document.getElementById('steps').innerHTML=d.steps.map((t,i)=>`<li class="${i<d.step?'done':i===d.step?'now':''}"><span class="dot"></span><span>${t}</span><small>${i<d.step?'done':i===d.step?'working':''}</small></li>`).join('');
-    document.getElementById('fill').style.width=Math.max(4,Math.round((d.step+0.5)/n*100))+'%';
+    // The bar moves with time as well as with steps, so the long agent step does not look stuck.
+    const byTime=Math.min(96,(Date.now()-started)/1000/510*100);
+    document.getElementById('fill').style.width=Math.max(4,Math.round((d.step+0.5)/n*100),Math.round(byTime))+'%';
+    showActivity(d.activity||[]);
   }catch(e){}
   setTimeout(poll,4000);
+}
+const TOOL={get_affinities:'Read what they love',get_demographics:'Read the age and gender lean',get_heatmap:'Read where they live',search_entities:'Searched Qloo',find_tags:'Searched Qloo tags',set_signal:'Changed the signal'};
+let shown='';
+function showActivity(list){
+  if(!list.length)return;
+  const key=JSON.stringify(list[list.length-1]);if(key===shown)return;shown=key;
+  const box=document.getElementById('acts');box.textContent='';
+  for(const a of list.slice(-5).reverse()){
+    const row=document.createElement('div');row.className='act';
+    const seg=document.createElement('span');seg.className='seg';seg.textContent=a.segment;
+    const what=document.createElement('div');const b=document.createElement('b');b.textContent=(TOOL[a.tool]||a.tool)+': ';what.append(b,document.createTextNode(a.ask+' → '+a.saw));
+    const why=document.createElement('div');why.className='why';why.textContent='Why: '+a.why;
+    row.append(seg,what,why);box.append(row);
+  }
+  document.getElementById('agent').style.display='block';
 }
 function fail(msg){
   document.getElementById('live').style.display='none';

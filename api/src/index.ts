@@ -8,11 +8,13 @@ import Anthropic from "@anthropic-ai/sdk";
 import { scrapePage, scrapeSite, type ScrapedPage } from "../../src/firecrawl.js";
 import { readProduct } from "../../src/read-product.js";
 import { Qloo } from "../../src/qloo.js";
-import { allSeedIds, gatherOverall, resolveSeeds, type SegmentTaste, type TasteData } from "../../src/taste.js";
+import { allSeedIds, gatherOverall, resolveSeeds, type SegmentTaste, type TasteData, type TrailStep } from "../../src/taste.js";
 import { investigateSegment } from "../../src/taste-agent.js";
 import { findCommunities, type Community } from "../../src/communities.js";
 import { writeReport } from "../../src/write-report.js";
-import { renderReport } from "../../src/render.js";
+import { ADS_MARKER, renderReport } from "../../src/render.js";
+import { makeAdKit } from "../../src/ads.js";
+import { renderAdKit, renderAdKitPending } from "../../src/render-ads.js";
 
 export interface Env {
   DB: D1Database;
@@ -78,8 +80,15 @@ export class ReportWorkflow extends WorkflowEntrypoint<Env, Params> {
       // One taste agent per audience, all at the same time. They share one Qloo client, whose queue
       // keeps requests one at a time, so running them together does not raise the Qloo request rate.
       const sharedQloo = qloo();
+      // The latest agent steps, shown live on the progress page. Writes are best effort.
+      const activity: (TrailStep & { segment: string })[] = [];
+      const onStep = (segment: string) => (s: TrailStep) => {
+        activity.push({ segment, ...s });
+        activity.splice(0, Math.max(0, activity.length - 12));
+        env.DB.prepare("UPDATE reports SET activity=? WHERE id=?").bind(JSON.stringify(activity), id).run().catch(() => {});
+      };
       const investigated = await Promise.all(resolved.segments.map((seg, i) => step.do(`taste segment ${i}`, RETRY, async () => {
-        const r = await investigateSegment(read.profile, seg, primary, exclude, resolved.tags, sharedQloo, claude());
+        const r = await investigateSegment(read.profile, seg, primary, exclude, resolved.tags, sharedQloo, claude(), onStep(seg.name));
         return { taste: r.taste, cost: usd(r.usage) };
       })));
       await step.do("cost taste", () => addCost(env, id, investigated.reduce((sum, x) => sum + x.cost, 0)));
@@ -103,9 +112,30 @@ export class ReportWorkflow extends WorkflowEntrypoint<Env, Params> {
           page, profile: read.profile, taste, communities, spec: spec.spec,
           date: new Date().toISOString().slice(0, 10), id: `WWL-${id.slice(0, 6).toUpperCase()}`, pagesRead: page.pages?.length ?? 1,
         });
-        await env.DB.prepare("UPDATE reports SET status='done', step=?, html=?, cost_usd=cost_usd+?, updated_at=? WHERE id=?")
-          .bind(STEPS.length, html, usd(spec.usage), Date.now(), id).run();
+        // The inputs are kept so the ad kit (and any later re-render) can be made without re-running the report.
+        const data = JSON.stringify({ page: { url: page.url, image: page.image ?? null }, profile: read.profile, taste, communities, spec: spec.spec });
+        await env.DB.prepare("UPDATE reports SET status='done', step=?, html=?, data=?, ads_status='running', cost_usd=cost_usd+?, updated_at=? WHERE id=?")
+          .bind(STEPS.length, html, data, usd(spec.usage), Date.now(), id).run();
       });
+
+      // The report is readable from here on. The ad kit follows on the same page, and a failure here
+      // only leaves the report without ads.
+      try {
+        const labels = Object.fromEntries(spec.spec.place_labels.map((p) => [p.raw, p.clean]));
+        const kits = await Promise.all(segments.map((seg, i) => step.do(`ads ${i}`, RETRY, async () => {
+          const r = await makeAdKit(read.profile, seg, spec.spec, communities, labels, sharedQloo, claude());
+          return { segment: seg.name, result: r.result, cost: usd(r.usage) };
+        })));
+        await step.do("save ads", async () => {
+          const brand = { name: read.profile.name, host: new URL(page.url).hostname.replace(/^www\./, ""), image: page.image ?? null };
+          await env.DB.prepare("UPDATE reports SET ads_status='done', ads_html=?, cost_usd=cost_usd+?, updated_at=? WHERE id=?")
+            .bind(renderAdKit(kits, brand), kits.reduce((sum, k) => sum + k.cost, 0), Date.now(), id).run();
+        });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        await step.do("ads failed", () => env.DB.prepare("UPDATE reports SET ads_status='failed', error=?, updated_at=? WHERE id=?")
+          .bind(`Ads: ${message}`.slice(0, 500), Date.now(), id).run().then(() => null));
+      }
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       await step.do("mark failed", () => env.DB.prepare("UPDATE reports SET status='failed', error=?, updated_at=? WHERE id=?")
@@ -193,15 +223,19 @@ async function createReport(request: Request, env: Env) {
 }
 
 async function reportStatus(id: string, env: Env) {
-  const row = await env.DB.prepare("SELECT id, url, scope, status, step, product_name, error, created_at, updated_at FROM reports WHERE id=?").bind(id).first();
+  const row = await env.DB.prepare("SELECT id, url, scope, status, step, product_name, error, ads_status, activity, created_at, updated_at FROM reports WHERE id=?").bind(id).first<Record<string, unknown>>();
   if (!row) return json({ error: "No report with that id." }, 404);
-  return json({ ...row, steps: STEPS });
+  return json({ ...row, activity: row.activity ? JSON.parse(String(row.activity)) : [], steps: STEPS });
 }
 
 async function reportHtml(id: string, env: Env) {
-  const row = await env.DB.prepare("SELECT html FROM reports WHERE id=? AND status='done'").bind(id).first<{ html: string }>();
+  const row = await env.DB.prepare("SELECT html, ads_status, ads_html FROM reports WHERE id=? AND status='done'").bind(id).first<{ html: string; ads_status: string | null; ads_html: string | null }>();
   if (!row?.html) return new Response("Not ready", { status: 404 });
-  return new Response(row.html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=300" } });
+  const pending = row.ads_status === "running";
+  const ads = row.ads_status === "done" && row.ads_html ? row.ads_html : pending ? renderAdKitPending(id) : "";
+  return new Response(row.html.replace(ADS_MARKER, () => ads), {
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": pending ? "no-store" : "public, max-age=300" },
+  });
 }
 
 // The gallery on /reports: reports we chose to show (featured > 0, in that order). The card details are

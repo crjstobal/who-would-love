@@ -66,11 +66,12 @@ const r3 = (n: number) => Math.round(n * 1000) / 1000;
 
 export async function investigateSegment(
   profile: ProductProfile, seg: ResolvedSegment, primary: string, exclude: string[], tags: { tag_id: string; name: string }[], qloo: Qloo, claude: Anthropic,
+  onStep?: (step: TrailStep) => void,
 ) {
   const usage = { input_tokens: 0, output_tokens: 0 };
   if (seg.confirmed.length === 0) return { taste: null, usage };
   try {
-    return { taste: await run(profile, seg, primary, exclude, tags, qloo, claude, usage), usage };
+    return { taste: await run(profile, seg, primary, exclude, tags, qloo, claude, usage, onStep), usage };
   } catch (e) {
     console.error(`Taste agent failed for "${seg.name}", using the fixed reading:`, e);
     return { taste: await gatherSegment(seg, primary, exclude, qloo), usage };
@@ -79,7 +80,7 @@ export async function investigateSegment(
 
 async function run(
   profile: ProductProfile, seg: ResolvedSegment, primary: string, exclude: string[], tags: { tag_id: string; name: string }[], qloo: Qloo, claude: Anthropic,
-  usage: { input_tokens: number; output_tokens: number },
+  usage: { input_tokens: number; output_tokens: number }, onStep?: (step: TrailStep) => void,
 ): Promise<SegmentTaste> {
   // Everything the agent may put in the signal, by id: confirmed seeds now, search results later.
   const known = new Map<string, ConfirmedSeed>(seg.confirmed.map((s) => [s.entity_id, s]));
@@ -88,6 +89,8 @@ async function run(
   const skip = new Set(exclude);
   const ledger: Ledger = { affinities: {}, demographics: null, places: [] };
   const trail: TrailStep[] = [];
+  // Each step is also reported as it happens, so the progress page can show the agent at work.
+  const log = (step: TrailStep) => { trail.push(step); onStep?.(step); };
   let calls = 0;
 
   const ents = () => signal.entities.join(",");
@@ -110,19 +113,19 @@ async function run(
         const flat = list.length > 2 && new Set(list.map((a) => a.affinity)).size === 1;
         ledger.affinities[type] ??= { mainstream: [], niche: [], in_market: [] };
         ledger.affinities[type][band] = list;
-        trail.push({ tool: name, ask: `${type}, ${band.replace("_", " ")}`, why: input.why, saw: flat ? "flat scores, no real signal" : top(list) });
+        log({ tool: name, ask: `${type}, ${band.replace("_", " ")}`, why: input.why, saw: flat ? "flat scores, no real signal" : top(list) });
         return { type, band, flat, entities: brief(list) };
       }
       case "get_demographics": {
         ledger.demographics = await demographics(ents(), qloo, tagList());
         const d = ledger.demographics;
         const lean = d ? Object.entries({ ...d.age, ...d.gender }).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 2).map(([k, v]) => `${k.replace(/_/g, " ")} ${v > 0 ? "+" : ""}${v.toFixed(2)}`).join(", ") : "no data";
-        trail.push({ tool: name, ask: "age and gender lean", why: input.why, saw: `strongest: ${lean}` });
+        log({ tool: name, ask: "age and gender lean", why: input.why, saw: `strongest: ${lean}` });
         return d ?? { error: "Qloo returned no demographics for this signal." };
       }
       case "get_heatmap": {
         ledger.places = await wherePopular(ents(), primary, 5, qloo, tagList());
-        trail.push({ tool: name, ask: `where in ${primary}`, why: input.why, saw: ledger.places.map((p) => p.label).join("; ") || "nothing" });
+        log({ tool: name, ask: `where in ${primary}`, why: input.why, saw: ledger.places.map((p) => p.label).join("; ") || "nothing" });
         return ledger.places.map((p) => ({ label: p.label, affinity: p.affinity }));
       }
       case "search_entities": {
@@ -131,14 +134,14 @@ async function run(
           id: e.entity_id, name: e.name, popularity: r3(e.popularity ?? 0), description: e.properties?.short_description ?? e.disambiguation ?? "",
         }));
         for (const f of found) if (!known.has(f.id)) known.set(f.id, { name: input.name, type: input.type, entity_id: f.id, qloo_name: f.name, why: "" });
-        trail.push({ tool: name, ask: `${input.type} "${input.name}"`, why: input.why, saw: found.slice(0, 3).map((f: any) => f.name).join(", ") || "no match" });
+        log({ tool: name, ask: `${input.type} "${input.name}"`, why: input.why, saw: found.slice(0, 3).map((f: any) => f.name).join(", ") || "no match" });
         return found;
       }
       case "find_tags": {
         const body = await qloo.tags(input.query);
         const found = (body.results?.tags ?? []).map((t: any) => ({ id: t.id, name: t.name }));
         for (const t of found) knownTags.set(t.id, t.name);
-        trail.push({ tool: name, ask: `"${input.query}"`, why: input.why, saw: found.slice(0, 3).map((t: any) => t.name).join(", ") || "no match" });
+        log({ tool: name, ask: `"${input.query}"`, why: input.why, saw: found.slice(0, 3).map((t: any) => t.name).join(", ") || "no match" });
         return found;
       }
       case "set_signal": {
@@ -148,7 +151,7 @@ async function run(
         if (entities.length + tagIds.length === 0) return { error: "The signal needs at least one known entity or tag id." };
         signal = { entities, tags: tagIds, why: input.why };
         const names = [...entities.map((id) => known.get(id)!.qloo_name), ...tagIds.map((id) => `#${knownTags.get(id)}`)];
-        trail.push({ tool: name, ask: names.join(", "), why: input.why, saw: unknown.length ? `ignored unknown ids: ${unknown.join(", ")}` : "signal changed" });
+        log({ tool: name, ask: names.join(", "), why: input.why, saw: unknown.length ? `ignored unknown ids: ${unknown.join(", ")}` : "signal changed" });
         return { signal: names, ...(unknown.length ? { ignored_unknown_ids: unknown } : {}) };
       }
     }

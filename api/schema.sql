@@ -10,6 +10,10 @@ CREATE TABLE IF NOT EXISTS reports (
   html TEXT,
   cost_usd REAL NOT NULL DEFAULT 0,
   ip_hash TEXT,
+  data TEXT,                           -- JSON inputs of the report (profile, taste, communities, spec)
+  ads_status TEXT,                     -- running, done, failed; NULL for reports made before ad kits
+  ads_html TEXT,
+  activity TEXT,                       -- JSON: the taste agents' latest steps, for the progress page
   featured INTEGER NOT NULL DEFAULT 0, -- > 0: shown in the /reports gallery, in this order
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL

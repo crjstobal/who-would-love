@@ -7,7 +7,7 @@ import type { Affinity, Demographics, SegmentTaste, TasteData } from "./taste.js
 import type { Community } from "./communities.js";
 import type { ReportSpec } from "./write-report.js";
 
-const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+export const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 const pad = (n: number) => String(n).padStart(2, "0");
 
 const TYPE_LABEL: Record<string, string> = {
@@ -23,8 +23,8 @@ const PLATFORM_LABEL: Record<string, string> = {
 
 const LOGO = `<svg viewBox="0 0 40 48" aria-hidden="true"><path stroke="currentColor" d="M20 37 C 9 29, 3 22, 3.5 14 C 4 7, 10 4, 14.5 5 C 17.5 5.7, 19.2 7.6, 20 10" fill="none" stroke-width="2.6" stroke-linecap="round"/><path d="M20 10 C 21.5 5.5, 26 3.6, 30 4.6 C 35 5.8, 37.5 10.5, 36 15.5 C 34.5 20.5, 27 22.5, 23.5 26 C 21.2 28.3, 20.4 31, 20.2 33.5" fill="none" stroke="#ff6a3d" stroke-width="5.5" stroke-linecap="round"/><circle cx="20" cy="43.5" r="3.4" fill="#ff6a3d"/></svg>`;
 
-const tag = (k: "q" | "w" | "o") => `<span class="tag ${k}">${{ q: "Qloo data", w: "Web research", o: "Our interpretation" }[k]}</span>`;
-const paste = (text: string) => `<div class="paste"><span>${esc(text)}</span><button type="button" onclick="copy(this)">Copy</button></div>`;
+export const tag = (k: "q" | "w" | "o") => `<span class="tag ${k}">${{ q: "Qloo data", w: "Web research", o: "Our interpretation" }[k]}</span>`;
+export const paste = (text: string) => `<div class="paste"><span>${esc(text)}</span><button type="button" onclick="copy(this)">Copy</button></div>`;
 
 function skewRow(label: string, v: number) {
   const w = Math.min(Math.abs(v), 1) * 50;
@@ -61,6 +61,8 @@ function trailBlock(seg: SegmentTaste) {
   return `<details class="box q trail"><summary>${tag("q")}<span class="sum">How the agent investigated this audience in Qloo <span class="muted">· ${seg.trail.length} steps</span></span></summary>
     ${seg.findings ? `<p class="findings">${esc(seg.findings.replace(/\*\*|__|^#+\s*/gm, ""))}</p>` : ""}<ol class="steps">${steps}</ol></details>`;
 }
+
+export const ADS_MARKER = "<!--ADS-->";
 
 export function renderReport(input: {
   page: ScrapedPage; profile: ProductProfile; taste: TasteData; communities: Community[]; spec: ReportSpec; date: string; id: string;
@@ -126,6 +128,9 @@ export function renderReport(input: {
         <p class="sub">First creative</p><p>${esc(s.creative_angle)}</p>
       </div>`, "audience"));
   });
+
+  // The ad kit is made after the report is saved; the API swaps this marker for it (or its progress).
+  sections.push(ADS_MARKER);
 
   const placeCols = Object.entries(taste.overall.places).filter(([, l]) => l.length).map(([m, l]) => `<div><h4>${esc(m)}</h4><ol class="places">${l.map((p) => `<li>${esc(clean(p.label))}</li>`).join("")}</ol></div>`).join("");
   sections.push(sec("Where the whole audience lives", `<p>All audiences together. Areas where this combined taste is strongest, by market.</p>`, `
