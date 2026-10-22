@@ -38,7 +38,7 @@ export const STEPS = [
   "Reading your page",
   "Understanding what it is and who it is for",
   "Matching starting points in Qloo",
-  "An agent investigates the taste graph, one audience at a time",
+  "Agents investigate the taste graph, one per audience",
   "Finding where they gather online",
   "Writing your report",
 ];
