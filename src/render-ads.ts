@@ -102,7 +102,7 @@ export function renderAdKitPending(id: string, audiences: number) {
       var a=(d.activity||[]).filter(function(x){return L[x.tool]}),box=document.getElementById('adActs');
       document.getElementById('adDone').textContent=a.filter(function(x){return x.saw==='critic approved'}).length;
       box.textContent='';
-      a.slice(-4).reverse().forEach(function(x){var r=el('div','adact');r.append(el('span','seg',x.segment),el('div',null,L[x.tool]+': '+x.ask+' → '+x.saw),el('div','why','Why: '+x.why));box.append(r)});
+      a.slice(-4).reverse().forEach(function(x){var r=el('div','adact');r.append(el('span','aseg',x.segment),el('div',null,L[x.tool]+': '+x.ask+' → '+x.saw),el('div','why','Why: '+x.why));box.append(r)});
       setTimeout(tick,4000)}).catch(function(){setTimeout(tick,6000)})}
     tick()})()</script>`;
 }
@@ -148,7 +148,7 @@ ul.vars{list-style:none}ul.vars li{padding:10px 0;border-bottom:1px solid var(--
 .adkit .pending .adbar i{display:block;height:100%;width:40%;border-radius:999px;background:var(--ours);animation:adbar 1.6s ease-in-out infinite}
 .adkit .adprog{margin-top:14px;font-size:14px;color:var(--ink-2)}.adkit .adprog span{font-family:var(--mono);font-weight:600;color:var(--ours)}
 .adkit .adact{padding:10px 0;border-bottom:1px solid var(--soft);font-size:14px}.adkit .adact:last-child{border-bottom:0}
-.adkit .adact .seg{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3)}.adkit .adact .why{font-size:13px;color:var(--ink-2);margin-top:2px}
+.adkit .adact .aseg{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3)}.adkit .adact .why{font-size:13px;color:var(--ink-2);margin-top:2px}
 .adkit .adacts{margin-top:10px}
 @keyframes adbar{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
 @media (max-width:860px){.copy,.channels{grid-template-columns:1fr;gap:0}.mocks{grid-template-columns:minmax(0,1fr);gap:16px}.mocks .story{width:62%;justify-self:center}}
