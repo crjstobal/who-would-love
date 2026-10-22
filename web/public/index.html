@@ -68,7 +68,8 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(40px,7vw,104px);li
 @keyframes chIn{from{opacity:0;transform:translateY(.5em) rotate(8deg);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}
 @keyframes chOut{to{opacity:0;transform:translateY(-.4em) rotate(-6deg);filter:blur(8px)}}
 .lede strong{color:#fff;font-weight:600}
-.pill{text-decoration:none;margin-bottom:22px}
+/* A hand-drawn orange stroke under the ad promise, repeated on every line it wraps to. */
+.lede .hand{padding-bottom:.18em;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8.5 C 40 4, 90 3.5, 150 5.5 S 250 9.5, 298 4' fill='none' stroke='%23ff6a3d' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") left bottom/100% .42em no-repeat;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .lede{font-size:19px;line-height:1.55;color:rgba(255,255,255,.72);max-width:38em;margin:0 auto}
 
 /* ---------- form: vertical flow ---------- */
@@ -240,6 +241,11 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
 .legal{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:52px;padding-top:24px;font-size:13.5px;color:var(--ink-3)}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.bigmark .l,.bigmark .q{stroke-dashoffset:0}.bigmark .d{opacity:.7}.extract span{opacity:1;transform:none}}
+@media (max-width:400px){
+  .logo{font-size:19px!important;gap:8px}.logo svg{width:23px!important;height:28px!important}
+  .navlinks a{padding:7px 8px!important;font-size:13.5px!important}
+}
+@media (max-width:340px){.logo{font-size:16px!important}.navlinks a{padding:7px 6px!important}}
 @media (max-width:960px){
   .wrap{padding:0 16px}
   .hero{padding:64px 18px 40px;border-radius:24px}
@@ -250,7 +256,9 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
   .why2{gap:16px;font-size:17px}
   .place.wide{grid-column:auto}
   .fgrid{grid-template-columns:1fr 1fr}
-  .navlinks a:not(.cta){display:none}
+  .navlinks a:not(.cta):not(.keep){display:none}
+  .navlinks{gap:2px}.navlinks a{white-space:nowrap;padding:8px 11px;font-size:14px}
+  .logo{white-space:nowrap}
   .choices{grid-template-columns:1fr}
   .form{padding:22px 18px}
   .extract{display:none}
@@ -276,7 +284,7 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
 <div class="wrap">
   <nav>
     <a class="logo" href="#"><svg aria-hidden="true"><use href="#mark"/></svg>Who Would Love</a>
-    <div class="navlinks"><a href="#how">How it works</a><a href="/reports">Sample reports</a><a href="/pricing">Pricing</a><a href="#faq">FAQ</a><a class="cta" href="#start">Try it free</a></div>
+    <div class="navlinks"><a href="#how">How it works</a><a href="/reports">Sample reports</a><a href="/pricing" class="keep">Pricing</a><a href="#faq">FAQ</a><a class="cta" href="#start">Try it free</a></div>
   </nav>
 
   <div class="hero" id="start">
@@ -289,10 +297,9 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
     </svg>
 
     <div class="hero-in">
-      <a class="pill" href="/reports"><b></b>New: an ad kit for every audience, written from what they love</a>
       <h1>Paste a link and discover<br>who would love<span class="rot" id="rot"></span></h1>
       
-      <p class="lede">We find the audiences who would love it in Qloo's real cultural taste data. Then our AI agents write <strong>ads made for what each audience loves</strong>: ready-to-run concepts with mockups, checked by a critic, and the places to run them.</p>
+      <p class="lede">We find the audiences who would love it in Qloo's real cultural taste data.<br>Then <strong class="hand">AI agents write ads made for what each audience loves</strong>: ready-to-run concepts with mockups, checked by a critic, and the places to run them.</p>
 
       <form class="form" id="f" onsubmit="send(event);return false">
         <div id="fields">
