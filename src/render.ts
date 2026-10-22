@@ -3,7 +3,7 @@
 
 import type { ScrapedPage } from "./firecrawl.js";
 import type { ProductProfile } from "./read-product.js";
-import type { Affinity, Demographics, TasteData } from "./taste.js";
+import type { Affinity, Demographics, SegmentTaste, TasteData } from "./taste.js";
 import type { Community } from "./communities.js";
 import type { ReportSpec } from "./write-report.js";
 
@@ -49,6 +49,19 @@ function communitiesTable(list: Community[]) {
   return `<table class="comm"><thead><tr><th>Where</th><th>Why it fits, and how to show up</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
+const TOOL_LABEL: Record<string, string> = {
+  get_affinities: "Read what they love", get_demographics: "Read the age and gender lean", get_heatmap: "Read where they live",
+  search_entities: "Searched the catalogue", find_tags: "Searched tags", set_signal: "Changed the signal",
+};
+
+// The taste agent's investigation for one audience, folded by default.
+function trailBlock(seg: SegmentTaste) {
+  if (!seg.trail?.length) return "";
+  const steps = seg.trail.map((s) => `<li><b>${esc(TOOL_LABEL[s.tool] ?? s.tool)}</b> <span class="ask">${esc(s.ask)}</span><div class="note">Why: ${esc(s.why)}</div><div class="note">Qloo: ${esc(s.saw)}</div></li>`).join("");
+  return `<details class="box q trail"><summary>${tag("q")}<span class="sum">How the agent investigated this audience in Qloo <span class="muted">· ${seg.trail.length} steps</span></span></summary>
+    ${seg.findings ? `<p class="findings">${esc(seg.findings.replace(/\*\*|__|^#+\s*/gm, ""))}</p>` : ""}<ol class="steps">${steps}</ol></details>`;
+}
+
 export function renderReport(input: {
   page: ScrapedPage; profile: ProductProfile; taste: TasteData; communities: Community[]; spec: ReportSpec; date: string; id: string;
   pagesRead?: number;
@@ -77,11 +90,14 @@ export function renderReport(input: {
     </div>`));
 
   const seeds = taste.segments.flatMap((s) => s.seeds.map((x) => `<span class="chip">${esc(x.qloo_name)}<small>${esc(TYPE_LABEL[x.type] ?? x.type)}</small></span>`));
-  const rejected = taste.segments.flatMap((s) => s.rejected.map((x) => `<span class="chip off">${esc(x.name)}<small>not in Qloo</small></span>`));
+  const rejected = taste.segments.flatMap((s) => [
+    ...s.rejected.map((x) => `<span class="chip off">${esc(x.name)}<small>not in Qloo</small></span>`),
+    ...(s.dropped ?? []).map((x) => `<span class="chip off" title="${esc(x.reason)}">${esc(x.name)}<small>dropped by the agent</small></span>`),
+  ]);
   sections.push(sec("What we understood", `<p>How the AI read your page before asking Qloo anything. If this is wrong, the rest is too: check it first.</p>`, `
     <div class="box o">${tag("o")}<p>${esc(spec.understood)}</p></div>
     <div class="box q">${tag("q")}<p>Starting points we matched in Qloo, one set per audience:</p><div class="chips">${[...new Set(seeds)].join("")}</div>
-      ${rejected.length ? `<p class="small">We also tried these, but Qloo had no exact match, so we left them out rather than guess:</p><div class="chips">${rejected.join("")}</div>` : ""}</div>`));
+      ${rejected.length ? `<p class="small">We also tried these, but left them out: Qloo had no exact match, or the agent found they pulled the signal away from this audience:</p><div class="chips">${rejected.join("")}</div>` : ""}</div>`));
 
   taste.segments.forEach((seg, i) => {
     const s = spec.segments.find((x) => x.name === seg.name);
@@ -101,6 +117,7 @@ export function renderReport(input: {
             ${seg.places.length ? `<h4 class="gap">Where in ${esc(primary)} this taste is strongest</h4><ol class="places">${seg.places.map((p) => `<li>${esc(clean(p.label))}</li>`).join("")}</ol>` : ""}</div>
         </div>
       </div>
+      ${trailBlock(seg)}
       ${comm.length ? `<div class="box w">${tag("w")}${communitiesTable(comm)}</div>` : ""}
       <div class="box o">${tag("o")}
         <p class="sub">Meta Ads interests</p>${paste(s.meta_interests.join(", "))}
@@ -121,6 +138,7 @@ export function renderReport(input: {
 
   sections.push(sec("Method and limits", "", `<div class="box o">${tag("o")}<ul class="limits">
     <li>Qloo results describe what groups of people tend to like. They are not a prediction about any single person.</li>
+    <li>For each audience, an AI agent chose which questions to ask Qloo, within a fixed budget. Its steps are listed under each audience; every number shown comes from Qloo's answers, not from the agent.</li>
     <li>Everything depends on how we read your page and which starting points we matched in Qloo (section 02).</li>
     <li>Affinity scores run from 0 to 1 and compare against everyone else. Demographic leans run from −1 to +1; 0 is average.</li>
     <li>Community sizes and rules change; check them before you post or spend. Links were checked on ${esc(date)}.</li>
@@ -285,6 +303,12 @@ ol.plan{padding-left:20px}ol.plan li{margin:8px 0}
 .limits li:last-child{border-bottom:0}
 .limits li::before{content:"!";position:absolute;left:0;top:10px;width:17px;height:17px;border-radius:50%;background:var(--soft);font-size:11px;font-weight:700;display:grid;place-items:center;color:var(--ink-2)}
 .muted{color:var(--ink-3);font-size:14px}
+.trail summary{cursor:pointer;list-style:none}.trail summary::-webkit-details-marker{display:none}
+.trail summary .tag{margin-bottom:8px}
+.trail .sum{display:block;font-weight:600}.trail .sum::after{content:" +";color:var(--ink-3)}.trail[open] .sum::after{content:" −"}
+.trail .findings{margin-top:14px;color:var(--ink-2)}
+ol.steps{padding-left:22px;margin-top:14px;font-size:14.5px}ol.steps li{margin:10px 0}
+ol.steps .ask{font-family:var(--mono);font-size:13px;color:var(--ink-2);overflow-wrap:anywhere}
 .empty{display:none;text-align:center;color:var(--ink-3);padding:60px 0}
 footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:28px;font-size:13px;color:var(--ink-3)}
 @media (max-width:860px){

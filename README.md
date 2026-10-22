@@ -73,8 +73,9 @@ browser ── whowouldlove.javi.link (Cloudflare Pages: web/)
 - `api/`: Worker with the HTTP API (create report, status, HTML) and the Workflow.
 - `web/`: static site (home, progress page, about) and two Pages Functions.
 - The API has no public URL; only the website reaches it, through a service binding.
-- Abuse and cost limits: 3 reports per IP per day, 25 per day in total, and a finished report for
-  the same link is reused for 30 days.
+- Until 2026-11-01 (UTC) only judges can start new reports; saved reports and the sample stay public.
+- Abuse and cost limits: 1 report per IP per day, 3 per day in total (judges skip both with their
+  code), and a finished report for the same link is reused for 30 days.
 
 Deploy with `scripts/deploy.sh [secrets|api|web|all]`. It reads the keys from AWS SSM and pipes
 them to `wrangler secret bulk`; nothing is written to disk. The D1 schema is in `api/schema.sql`.

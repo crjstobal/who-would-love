@@ -10,7 +10,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { scrapePage, type ScrapedPage } from "../src/firecrawl.js";
 import { readProduct, type ProductProfile } from "../src/read-product.js";
 import { Qloo } from "../src/qloo.js";
-import { gatherTaste, resolveSeeds, type TasteData } from "../src/taste.js";
+import { allSeedIds, gatherOverall, resolveSeeds, type SegmentTaste, type TasteData } from "../src/taste.js";
+import { investigateSegment } from "../src/taste-agent.js";
 import { findCommunities, type Community } from "../src/communities.js";
 import { writeReport, type ReportSpec } from "../src/write-report.js";
 import { renderReport } from "../src/render.js";
@@ -81,7 +82,19 @@ const taste = await step<TasteData>(`${dir}/02-taste.json`, "2. Taste data (Qloo
     console.log(`    ${seg.name}: ${seg.confirmed.map((s) => s.qloo_name).join(" · ")}`);
     for (const r of seg.rejected) console.log(`      rejected ${r.name}: ${r.reason}`);
   }
-  return gatherTaste(resolved, qloo, (m) => console.log(`    ${m} (${secs(t)})`));
+  const primary = resolved.markets[0] ?? "United States";
+  const segments: SegmentTaste[] = [];
+  // All audiences at once, as in production; the shared Qloo client keeps requests one at a time.
+  const runs = await Promise.all(resolved.segments.map((seg) => investigateSegment(profile, seg, primary, allSeedIds(resolved), resolved.tags, qloo, claude)));
+  for (const [i, r] of runs.entries()) {
+    const seg = resolved.segments[i];
+    if (!r.taste) { console.log(`    skipped "${seg.name}": no confirmed seeds`); continue; }
+    segments.push(r.taste);
+    console.log(`    "${seg.name}": ${r.taste.trail?.length ?? "fixed reading, no"} agent steps, ${charge(r.usage)} (${secs(t)})`);
+    for (const s of r.taste.trail ?? []) console.log(`      ${s.tool} ${s.ask} -> ${s.saw.slice(0, 90)}\n        why: ${s.why}`);
+    if (r.taste.findings) console.log(`      findings: ${r.taste.findings}`);
+  }
+  return { markets: resolved.markets, tags: resolved.tags, segments, overall: await gatherOverall(resolved, qloo) };
 });
 
 const communities = await step<Community[]>(`${dir}/03-communities.json`, "3. Communities (Opus + web search)", async () => {

@@ -39,6 +39,7 @@ You receive the product profile, Qloo taste data per audience segment, and commu
 Ground rules:
 - Qloo data describes what groups of people tend to like. Never describe an individual, never claim causation or probability for a person ("people who love X tend to also love Y", not "your users will love Y").
 - When you pick Qloo entities, copy their entity_id exactly from that segment's lists (mainstream, niche or in_market). Prefer specific and niche picks that a maker can act on (target, sponsor, reference in an ad) over household names everyone likes.
+- Each segment may carry analyst_findings: notes from the agent that investigated it in Qloo. Use them in your reading, but the lists are the evidence.
 - Leave out political, religious and adult entities and communities, even if Qloo returns them.
 - Only pick communities from the list you are given, by exact name. Prefer ones whose link was confirmed.
 - Describe demographic leans by their size: under 0.15 is no real lean (say so), 0.15 to 0.35 is a slight lean, above 0.35 is a clear lean. Never call a weak lean "clear".
@@ -51,6 +52,7 @@ function compactTaste(t: TasteData) {
     segments: t.segments.map((s) => ({
       name: s.name, description: s.description,
       seeds: s.seeds.map((x) => x.qloo_name),
+      analyst_findings: s.findings ?? null,
       demographics: s.demographics,
       places: s.places.map((p) => p.label),
       loves: Object.fromEntries(Object.entries(s.affinities).map(([type, l]) => [type, {

@@ -14,8 +14,10 @@
     { "binding": "DB", "database_name": "who-would-love", "database_id": "0a65bc05-38db-46b1-9ea2-7d9023ea3279" }
   ],
   "vars": {
-    "DAILY_CAP": "25",
-    "PER_IP_DAILY_CAP": "3",
+    "DAILY_CAP": "3",
+    "PER_IP_DAILY_CAP": "1",
+    // Until this moment only judges (with their code) can start new reports.
+    "PUBLIC_FROM": "2026-11-01T00:00:00Z",
     "TURNSTILE_SITE_KEY": "REPLACE_ME"
   }
   // Secrets (set with `wrangler secret put`, loaded from AWS SSM by scripts/deploy.sh):

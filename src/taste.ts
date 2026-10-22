@@ -10,9 +10,9 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { MODEL, type ProductProfile } from "./read-product.js";
 import type { Qloo } from "./qloo.js";
 
-const AFFINITY_TYPES = ["brand", "book", "movie", "tv_show", "podcast", "artist", "person", "videogame", "destination"] as const;
+export const AFFINITY_TYPES = ["brand", "book", "movie", "tv_show", "podcast", "artist", "person", "videogame", "destination"] as const;
 // Popularity band for the niche list: high enough to be real, low enough to skip household names.
-const NICHE = { min: 0.3, max: 0.9 };
+export const NICHE = { min: 0.3, max: 0.9 };
 
 interface Candidate { id: string; name: string; description: string; year?: number; popularity: number; tags: string[] }
 
@@ -32,7 +32,14 @@ export interface SegmentTaste {
   weak: string[];
   demographics: Demographics | null;
   places: Place[];
+  // Set when the taste agent read this segment (see taste-agent.ts); absent on the fixed fallback.
+  dropped?: RejectedSeed[];
+  trail?: TrailStep[];
+  findings?: string | null;
 }
+
+// One question the taste agent asked Qloo: which tool, what it asked, why, and what came back.
+export interface TrailStep { tool: string; ask: string; why: string; saw: string }
 
 export interface TasteData {
   markets: string[];
@@ -138,9 +145,10 @@ async function placeName(lat: number, lon: number): Promise<string> {
   return label;
 }
 
-async function wherePopular(signal: string, market: string, max: number, qloo: Qloo): Promise<Place[]> {
+export async function wherePopular(signal: string, market: string, max: number, qloo: Qloo, tags = ""): Promise<Place[]> {
   const body = await qloo.insights({
-    "filter.type": "urn:heatmap", "signal.interests.entities": signal, "filter.location.query": market, take: 30,
+    "filter.type": "urn:heatmap", "signal.interests.entities": signal || undefined, "signal.interests.tags": tags || undefined,
+    "filter.location.query": market, take: 30,
   }).catch(() => ({}));
   const cells = [...(body.results?.heatmap ?? [])].sort((a: any, b: any) => b.query.affinity - a.query.affinity);
   const places: Place[] = [];
@@ -153,13 +161,15 @@ async function wherePopular(signal: string, market: string, max: number, qloo: Q
   return places;
 }
 
-async function demographics(signal: string, qloo: Qloo): Promise<Demographics | null> {
-  const body = await qloo.insights({ "filter.type": "urn:demographics", "signal.interests.entities": signal }).catch(() => ({}));
+export async function demographics(signal: string, qloo: Qloo, tags = ""): Promise<Demographics | null> {
+  const body = await qloo.insights({
+    "filter.type": "urn:demographics", "signal.interests.entities": signal || undefined, "signal.interests.tags": tags || undefined,
+  }).catch(() => ({}));
   const d = body.results?.demographics?.[0]?.query;
   return d ? { age: d.age, gender: d.gender } : null;
 }
 
-function toAffinity(e: any): Affinity {
+export function toAffinity(e: any): Affinity {
   return {
     name: e.name, entity_id: e.entity_id,
     affinity: Math.round((e.query?.affinity ?? 0) * 1000) / 1000,
@@ -193,7 +203,7 @@ async function affinities(signal: string, market: string, exclude: Set<string>, 
 }
 
 export type Resolved = Awaited<ReturnType<typeof resolveSeeds>>;
-type ResolvedSegment = Resolved["segments"][number];
+export type ResolvedSegment = Resolved["segments"][number];
 
 export const allSeedIds = (resolved: Resolved) => [...new Set(resolved.segments.flatMap((s) => s.confirmed.map((c) => c.entity_id)))];
 
@@ -215,16 +225,4 @@ export async function gatherOverall(resolved: Resolved, qloo: Qloo): Promise<Tas
   const places: Record<string, Place[]> = {};
   for (const m of resolved.markets) places[m] = await wherePopular(signal, m, 6, qloo);
   return { demographics: await demographics(signal, qloo), places };
-}
-
-export async function gatherTaste(resolved: Resolved, qloo: Qloo, log = (_: string) => {}): Promise<TasteData> {
-  const primary = resolved.markets[0] ?? "United States";
-  const exclude = allSeedIds(resolved);
-  const segments: SegmentTaste[] = [];
-  for (const seg of resolved.segments) {
-    const out = await gatherSegment(seg, primary, exclude, qloo);
-    if (out) segments.push(out);
-    log(out ? `segment "${seg.name}" done` : `skipped segment "${seg.name}": no confirmed seeds`);
-  }
-  return { markets: resolved.markets, tags: resolved.tags, segments, overall: await gatherOverall(resolved, qloo) };
 }

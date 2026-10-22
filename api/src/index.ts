@@ -8,7 +8,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { scrapePage, scrapeSite, type ScrapedPage } from "../../src/firecrawl.js";
 import { readProduct } from "../../src/read-product.js";
 import { Qloo } from "../../src/qloo.js";
-import { allSeedIds, gatherOverall, gatherSegment, resolveSeeds, type SegmentTaste, type TasteData } from "../../src/taste.js";
+import { allSeedIds, gatherOverall, resolveSeeds, type SegmentTaste, type TasteData } from "../../src/taste.js";
+import { investigateSegment } from "../../src/taste-agent.js";
 import { findCommunities, type Community } from "../../src/communities.js";
 import { writeReport } from "../../src/write-report.js";
 import { renderReport } from "../../src/render.js";
@@ -25,6 +26,7 @@ export interface Env {
   JUDGE_CODE?: string;
   DAILY_CAP: string;
   PER_IP_DAILY_CAP: string;
+  PUBLIC_FROM: string;
 }
 
 type Params = { id: string; url: string; scope: "page" | "site" };
@@ -34,7 +36,7 @@ export const STEPS = [
   "Reading your page",
   "Understanding what it is and who it is for",
   "Matching starting points in Qloo",
-  "Reading the taste graph, one audience at a time",
+  "An agent investigates the taste graph, one audience at a time",
   "Finding where they gather online",
   "Writing your report",
 ];
@@ -73,11 +75,15 @@ export class ReportWorkflow extends WorkflowEntrypoint<Env, Params> {
 
       const primary = resolved.markets[0] ?? "United States";
       const exclude = allSeedIds(resolved);
-      const segments: SegmentTaste[] = [];
-      for (const [i, seg] of resolved.segments.entries()) {
-        const out = await step.do(`taste segment ${i}`, RETRY, () => gatherSegment(seg, primary, exclude, qloo()));
-        if (out) segments.push(out);
-      }
+      // One taste agent per audience, all at the same time. They share one Qloo client, whose queue
+      // keeps requests one at a time, so running them together does not raise the Qloo request rate.
+      const sharedQloo = qloo();
+      const investigated = await Promise.all(resolved.segments.map((seg, i) => step.do(`taste segment ${i}`, RETRY, async () => {
+        const r = await investigateSegment(read.profile, seg, primary, exclude, resolved.tags, sharedQloo, claude());
+        return { taste: r.taste, cost: usd(r.usage) };
+      })));
+      await step.do("cost taste", () => addCost(env, id, investigated.reduce((sum, x) => sum + x.cost, 0)));
+      const segments: SegmentTaste[] = investigated.flatMap((x) => (x.taste ? [x.taste] : []));
       const overall = await step.do("taste overall", RETRY, () => gatherOverall(resolved, qloo()));
       const taste: TasteData = { markets: resolved.markets, tags: resolved.tags, segments, overall };
 
@@ -173,6 +179,8 @@ async function createReport(request: Request, env: Env) {
   const since = Date.now() - DAY;
   const counts = await env.DB.prepare("SELECT COUNT(*) AS total, SUM(CASE WHEN ip_hash=? THEN 1 ELSE 0 END) AS mine FROM reports WHERE created_at>?")
     .bind(ipHash, since).first<{ total: number; mine: number | null }>();
+  // Before PUBLIC_FROM only judges can start new reports; saved reports stay open to everyone.
+  if (!judge && Date.now() < Date.parse(env.PUBLIC_FROM)) return json({ error: "New reports open to the public on November 1, 2026. In the meantime, open the sample report to see what you get." }, 403);
   if (!judge && (counts?.mine ?? 0) >= Number(env.PER_IP_DAILY_CAP)) return json({ error: "You have used today's free reports. Come back tomorrow, or open the sample report in the meantime." }, 429);
   if (!judge && (counts?.total ?? 0) >= Number(env.DAILY_CAP)) return json({ error: "We have hit today's limit of free reports (each one runs real AI and data queries). Please try again tomorrow, or open the sample report." }, 429);
 
