@@ -97,6 +97,9 @@ button.go{display:flex;align-items:center;justify-content:center;gap:10px;width:
   background:linear-gradient(100deg,var(--ink),#16303a);transition:transform .15s,box-shadow .2s,background .3s}
 button.go:hover{background:linear-gradient(100deg,var(--accent-2),#ff4f7b);box-shadow:0 14px 30px -12px rgba(226,85,45,.7)}
 button.go:active{transform:scale(.99)}
+.gorow{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:6px}.gorow button.go{margin-top:0}
+.go2{display:flex;align-items:center;justify-content:center;padding:0 24px;border-radius:16px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-weight:600;font-size:16px;text-decoration:none;white-space:nowrap;transition:border-color .2s,color .2s}
+.go2:hover{border-color:var(--accent);color:var(--accent-2)}
 button.go span{transition:transform .2s}button.go:hover span{transform:translateX(4px)}
 .fine{font-size:13px;color:var(--ink-3);margin-top:12px;text-align:center}
 .sent{display:none;text-align:center;padding:12px 4px 4px}
@@ -260,6 +263,7 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
   .navlinks{gap:2px}.navlinks a{white-space:nowrap;padding:8px 11px;font-size:14px}
   .logo{white-space:nowrap}
   .choices{grid-template-columns:1fr}
+  .gorow{grid-template-columns:1fr}.go2{padding:15px}
   .form{padding:22px 18px}
   .extract{display:none}
   .logo{font-size:22px}.logo svg{width:28px;height:34px}
@@ -318,7 +322,7 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
               <div class="hint" id="hint"></div></div>
           </div>
           <div id="ts" class="ts"></div>
-          <button class="go" id="go" type="submit">Find who would love it <span>→</span></button>
+          <div class="gorow"><button class="go" id="go" type="submit">Find who would love it <span>→</span></button><a class="go2" href="/reports">See sample reports</a></div>
           <p class="err" id="err" role="alert"></p>
           <p class="fine">No signup, no email. It takes about eight minutes; you can leave and come back to the same link.</p>
         </div>

@@ -226,7 +226,9 @@ function spy(){
   for(const a of links){const s=document.getElementById(a.getAttribute('href').slice(1));if(s&&!s.classList.contains('hidden')&&s.getBoundingClientRect().top<=y)on=a;}
   if(on===current)return;current=on;
   links.forEach(a=>a.classList.toggle('on',a===on));
-  if(on)toc.scrollTo({left:on.offsetLeft-toc.clientWidth/2+on.offsetWidth/2,behavior:'smooth'});
+  // Positions are measured inside the menu itself (it is the offset parent), so the first
+  // sections stay reachable and the menu follows the reading from start to end.
+  toc.scrollTo({left:on?on.offsetLeft-toc.clientWidth/2+on.offsetWidth/2:0,behavior:'smooth'});
 }
 addEventListener('scroll',spy,{passive:true});spy();
 // Faded edges and arrows when the menu has more sections to either side.
@@ -287,7 +289,7 @@ main{padding:24px 0 80px}
 .sec.hidden{display:none}
 @media (min-width:861px){.side{position:sticky;top:calc(var(--barh,124px) + 16px);align-self:start}}
 .sec{scroll-margin-top:calc(var(--barh,124px) + 8px)}
-.toc{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:0 0 10px;margin-top:-4px}
+.toc{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:0 0 10px;margin-top:-4px}
 .toc::-webkit-scrollbar{display:none}
 .toc a{flex:none;font-size:13.5px;color:var(--ink-2);text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s}
 .toc a:hover{background:#ebe7ee;color:var(--ink)}
