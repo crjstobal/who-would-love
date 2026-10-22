@@ -105,6 +105,7 @@ const { $schema: _, ...kitSchema } = z.toJSONSchema(AdKit) as Record<string, unk
 
 export async function makeAdKit(
   profile: ProductProfile, seg: SegmentTaste, spec: ReportSpec, communities: Community[], placeLabels: Record<string, string>, qloo: Qloo, claude: Anthropic,
+  onStep?: (step: TrailStep) => void,
 ) {
   const usage = { input_tokens: 0, output_tokens: 0 };
   const add = (u: { input_tokens: number; output_tokens: number }) => { usage.input_tokens += u.input_tokens; usage.output_tokens += u.output_tokens; };
@@ -120,6 +121,8 @@ export async function makeAdKit(
   const segSpec = spec.segments.find((s) => s.name === seg.name);
   const signal = seg.seeds.map((s) => s.entity_id).join(",");
   const trail: TrailStep[] = [];
+  // Each step is also reported as it happens, so the page can show the agents at work.
+  const log = (step: TrailStep) => { trail.push(step); onStep?.(step); };
   let localCalls = 0;
   let reviews = 0;
   let last: { kit: AdKit; approved: boolean } | null = null;
@@ -163,7 +166,7 @@ export async function makeAdKit(
       });
       const list = (body.results?.entities ?? []).map(toAffinity) as Affinity[];
       for (const a of list) entities[a.entity_id] ??= { name: a.name, type: input.type, affinity: a.affinity };
-      trail.push({ tool: name, ask: `${input.type} in ${input.place}`, why: input.why, saw: list.slice(0, 3).map((a) => `${a.name} (${a.affinity.toFixed(2)})`).join(", ") || "nothing" });
+      log({ tool: name, ask: `${input.type} in ${input.place}`, why: input.why, saw: list.slice(0, 3).map((a) => `${a.name} (${a.affinity.toFixed(2)})`).join(", ") || "nothing" });
       return brief(list, input.type);
     }
     if (name === "submit_kit") {
@@ -172,7 +175,7 @@ export async function makeAdKit(
       reviews++;
       const issues = await review(parsed.data);
       last = { kit: parsed.data, approved: issues.length === 0 };
-      trail.push({ tool: name, ask: `draft ${reviews}`, why: input.why, saw: issues.length ? `critic: ${issues.length} issue(s): ${issues[0]}` : "critic approved" });
+      log({ tool: name, ask: `draft ${reviews}`, why: input.why, saw: issues.length ? `critic: ${issues.length} issue(s): ${issues[0]}` : "critic approved" });
       if (issues.length && reviews >= MAX_REVIEWS) return { approved: false, issues, note: "Out of review rounds. Stop now." };
       return { approved: issues.length === 0, issues };
     }

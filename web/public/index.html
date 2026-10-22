@@ -67,6 +67,8 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(40px,7vw,104px);li
 .rot.leaving .ch{animation:chOut .45s cubic-bezier(.6,0,.8,.4) both;animation-delay:calc(var(--i)*22ms)}
 @keyframes chIn{from{opacity:0;transform:translateY(.5em) rotate(8deg);filter:blur(10px)}to{opacity:1;transform:none;filter:blur(0)}}
 @keyframes chOut{to{opacity:0;transform:translateY(-.4em) rotate(-6deg);filter:blur(8px)}}
+.lede strong{color:#fff;font-weight:600}
+.pill{text-decoration:none;margin-bottom:22px}
 .lede{font-size:19px;line-height:1.55;color:rgba(255,255,255,.72);max-width:38em;margin:0 auto}
 
 /* ---------- form: vertical flow ---------- */
@@ -287,9 +289,10 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
     </svg>
 
     <div class="hero-in">
+      <a class="pill" href="/reports"><b></b>New: an ad kit for every audience, written from what they love</a>
       <h1>Paste a link and discover<br>who would love<span class="rot" id="rot"></span></h1>
       
-      <p class="lede">We read your page, match it against real cultural taste data from Qloo, and build you a report: who your audience is, what else they love, where you can actually reach them, and the ads to say it.</p>
+      <p class="lede">We find the audiences who would love it in Qloo's real cultural taste data. Then our AI agents write <strong>ads made for what each audience loves</strong>: ready-to-run concepts with mockups, checked by a critic, and the places to run them.</p>
 
       <form class="form" id="f" onsubmit="send(event);return false">
         <div id="fields">
@@ -313,7 +316,7 @@ footer ul{list-style:none}footer li{margin:9px 0;font-size:15px}footer a{text-de
           <p class="fine">No signup, no email. It takes about eight minutes; you can leave and come back to the same link.</p>
         </div>
       </form>
-      <div class="proof"><span>No signup</span><span>Report in about 8 minutes</span><span>Ads written for each audience</span></div>
+      <div class="proof"><span>No signup</span><span>Report in about 8 minutes</span><span>Ad kit for every audience</span></div>
     </div>
   </div>
 </div>

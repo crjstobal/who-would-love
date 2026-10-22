@@ -75,8 +75,13 @@ export function renderReport(input: {
   const primary = taste.markets[0] ?? "";
   const host = new URL(page.url).hostname.replace(/^www\./, "");
   let n = 0;
-  const sec = (title: string, side: string, blocks: string, cls = "") =>
-    `<section class="sec ${cls}"><div class="side"><div class="num">${pad(++n)}</div><h2>${title}</h2>${side}</div><div class="blocks">${blocks}</div></section>`;
+  // Every section also gets an entry in the sticky section menu under the source filter.
+  const nav: { id: string; label: string; hot?: boolean }[] = [];
+  const sec = (title: string, side: string, blocks: string, cls = "", label = title) => {
+    const sid = `s${pad(++n)}`;
+    nav.push({ id: sid, label });
+    return `<section class="sec ${cls}" id="${sid}"><div class="side"><div class="num">${pad(n)}</div><h2>${title}</h2>${side}</div><div class="blocks">${blocks}</div></section>`;
+  };
 
   // Count of Qloo affinities read, for the cover numbers.
   const qlooCount = taste.segments.reduce((sum, s) => sum + Object.values(s.affinities).reduce((x, l) => x + l.mainstream.length + l.niche.length + l.in_market.length, 0), 0);
@@ -89,7 +94,8 @@ export function renderReport(input: {
       <div class="kpi o"><b>${taste.segments.length}</b><span>Distinct audiences, each with its own taste</span>${tag("o")}</div>
       <div class="kpi q"><b>${qlooCount}</b><span>Taste affinities read from Qloo</span>${tag("q")}</div>
       <div class="kpi w"><b>${new Set(okCommunities.map((c) => c.url)).size}</b><span>Places to reach them, links checked</span>${tag("w")}</div>
-    </div>`));
+    </div>
+    <a class="adcall" href="#ads"><span class="spark">✦</span><span><b>Your ad kit is part of this report</b>Three ready-to-run ads for each audience, written from what they love and checked by a critic agent.</span><i>See the ads ↓</i></a>`, "", "Summary"));
 
   const seeds = taste.segments.flatMap((s) => s.seeds.map((x) => `<span class="chip">${esc(x.qloo_name)}<small>${esc(TYPE_LABEL[x.type] ?? x.type)}</small></span>`));
   const rejected = taste.segments.flatMap((s) => [
@@ -99,7 +105,7 @@ export function renderReport(input: {
   sections.push(sec("What we understood", `<p>How the AI read your page before asking Qloo anything. If this is wrong, the rest is too: check it first.</p>`, `
     <div class="box o">${tag("o")}<p>${esc(spec.understood)}</p></div>
     <div class="box q">${tag("q")}<p>Starting points we matched in Qloo, one set per audience:</p><div class="chips">${[...new Set(seeds)].join("")}</div>
-      ${rejected.length ? `<p class="small">We also tried these, but left them out: Qloo had no exact match, or the agent found they pulled the signal away from this audience:</p><div class="chips">${rejected.join("")}</div>` : ""}</div>`));
+      ${rejected.length ? `<p class="small">We also tried these, but left them out: Qloo had no exact match, or the agent found they pulled the signal away from this audience:</p><div class="chips">${rejected.join("")}</div>` : ""}</div>`, "", "What we read"));
 
   taste.segments.forEach((seg, i) => {
     const s = spec.segments.find((x) => x.name === seg.name);
@@ -131,15 +137,16 @@ export function renderReport(input: {
 
   // The ad kit is made after the report is saved; the API swaps this marker for it (or its progress).
   sections.push(ADS_MARKER);
+  nav.push({ id: "ads", label: "Ad kit", hot: true });
 
   const placeCols = Object.entries(taste.overall.places).filter(([, l]) => l.length).map(([m, l]) => `<div><h4>${esc(m)}</h4><ol class="places">${l.map((p) => `<li>${esc(clean(p.label))}</li>`).join("")}</ol></div>`).join("");
   sections.push(sec("Where the whole audience lives", `<p>All audiences together. Areas where this combined taste is strongest, by market.</p>`, `
     <div class="box q">${tag("q")}<div class="placecols">${placeCols}</div></div>
-    <div class="box o">${tag("o")}<p>${esc(spec.places_reading)}</p></div>`));
+    <div class="box o">${tag("o")}<p>${esc(spec.places_reading)}</p></div>`, "", "Where they live"));
 
-  sections.push(sec("What we would try first", "", `<div class="box o">${tag("o")}<ol class="plan">${spec.plan.map((p) => `<li>${esc(p)}</li>`).join("")}</ol></div>`));
+  sections.push(sec("What we would try first", "", `<div class="box o">${tag("o")}<ol class="plan">${spec.plan.map((p) => `<li>${esc(p)}</li>`).join("")}</ol></div>`, "", "First steps"));
 
-  sections.push(sec("What your page does not say", `<p>Questions these audiences will have that your page leaves open.</p>`, `<div class="box o">${tag("o")}<ul class="limits">${spec.page_gaps.map((p) => `<li>${esc(p)}</li>`).join("")}</ul></div>`));
+  sections.push(sec("What your page does not say", `<p>Questions these audiences will have that your page leaves open.</p>`, `<div class="box o">${tag("o")}<ul class="limits">${spec.page_gaps.map((p) => `<li>${esc(p)}</li>`).join("")}</ul></div>`, "", "Page gaps"));
 
   sections.push(sec("Method and limits", "", `<div class="box o">${tag("o")}<ul class="limits">
     <li>Qloo results describe what groups of people tend to like. They are not a prediction about any single person.</li>
@@ -148,7 +155,7 @@ export function renderReport(input: {
     <li>Affinity scores run from 0 to 1 and compare against everyone else. Demographic leans run from −1 to +1; 0 is average.</li>
     <li>Community sizes and rules change; check them before you post or spend. Links were checked on ${esc(date)}.</li>
     <li>No personal data was sent to Qloo. Only the public content of your page was analysed.</li>
-  </ul></div>`));
+  </ul></div>`, "", "Method"));
 
   const icon = page.image
     ? `<img src="${esc(page.image)}" alt="">`
@@ -184,7 +191,9 @@ export function renderReport(input: {
     <button type="button" aria-pressed="false" data-f="w"><i style="background:var(--web)"></i>Web research</button>
     <button type="button" aria-pressed="false" data-f="o"><i style="background:var(--ours)"></i>Our interpretation</button>
   </div>
-</div></div>
+</div>
+<div class="wrap"><nav class="toc" id="toc" aria-label="Sections">${nav.map((x) => `<a href="#${x.id}"${x.hot ? ' class="hot"' : ""}>${x.hot ? "✦ " : ""}${x.label}</a>`).join("")}</nav></div>
+</div>
 <main><div class="wrap">
 ${sections.join("\n")}
 <p class="empty" id="empty">Nothing from this source in the report.</p>
@@ -204,6 +213,22 @@ btns.forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.kpis').forEach(k=>k.style.display=[...k.children].some(c=>!c.classList.contains('hidden'))?'':'none');
   document.getElementById('empty').style.display=any?'none':'block';
 }));
+// Section menu: keep the sticky offsets in step with the bar, and mark the section being read.
+const bar=document.querySelector('.bar'),toc=document.getElementById('toc'),links=[...toc.querySelectorAll('a')];
+const setBar=()=>document.documentElement.style.setProperty('--barh',bar.offsetHeight+'px');
+setBar();addEventListener('resize',setBar);
+// Reports whose ad kit failed have no #ads section: drop its menu entry and the call-out.
+if(!document.getElementById('ads')){links.filter(a=>a.hash==='#ads').forEach(a=>a.remove());document.querySelector('.adcall')?.remove();links.splice(0,links.length,...toc.querySelectorAll('a'));}
+let current=null;
+function spy(){
+  const y=bar.offsetHeight+60;let on=null;
+  for(const a of links){const s=document.getElementById(a.getAttribute('href').slice(1));if(s&&!s.classList.contains('hidden')&&s.getBoundingClientRect().top<=y)on=a;}
+  if(on===current)return;current=on;
+  links.forEach(a=>a.classList.toggle('on',a===on));
+  if(on)toc.scrollTo({left:on.offsetLeft-toc.clientWidth/2+on.offsetWidth/2,behavior:'smooth'});
+}
+addEventListener('scroll',spy,{passive:true});spy();
+btns.forEach(b=>b.addEventListener('click',()=>{links.forEach(a=>{const s=document.getElementById(a.getAttribute('href').slice(1));a.classList.toggle('off',!s||s.classList.contains('hidden'))});spy();}));
 function copy(btn){
   const t=btn.previousElementSibling.textContent;
   (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy',1400)}).catch(()=>{});
@@ -250,7 +275,22 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(36px,6vw,72px);let
 main{padding:24px 0 80px}
 .sec{display:grid;grid-template-columns:260px 1fr;gap:40px;padding:48px 0;border-bottom:1px solid var(--line)}
 .sec.hidden{display:none}
-@media (min-width:861px){.side{position:sticky;top:92px;align-self:start}}
+@media (min-width:861px){.side{position:sticky;top:calc(var(--barh,124px) + 16px);align-self:start}}
+.sec{scroll-margin-top:calc(var(--barh,124px) + 8px)}
+.toc{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:0 0 10px;margin-top:-4px}
+.toc::-webkit-scrollbar{display:none}
+.toc a{flex:none;font-size:13.5px;color:var(--ink-2);text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s}
+.toc a:hover{background:#ebe7ee;color:var(--ink)}
+.toc a.on{background:var(--ink);color:#fff}
+.toc a.hot{background:var(--accent);color:#fff;font-weight:600}
+.toc a.hot.on{background:var(--accent-2);box-shadow:0 0 0 3px rgba(255,106,61,.25)}
+.toc a.off{display:none}
+.adcall{display:flex;align-items:center;gap:16px;text-decoration:none;color:#fff;background:linear-gradient(120deg,#15121b,#3a1f3f 60%,#e2552d);border-radius:20px;padding:20px 24px;transition:transform .2s}
+.adcall:hover{transform:translateY(-2px)}
+.adcall .spark{font-size:26px;color:#ffb38f}
+.adcall b{display:block;font-family:var(--display);font-size:20px;letter-spacing:-.02em;margin-bottom:2px}
+.adcall span span,.adcall > span:nth-child(2){font-size:14.5px;color:rgba(255,255,255,.8)}
+.adcall i{margin-left:auto;font-style:normal;font-weight:600;white-space:nowrap;background:#fff;color:#15121b;padding:9px 14px;border-radius:12px;font-size:14px}
 .side .num{font-family:var(--mono);font-size:13px;color:var(--accent-2)}
 .side h2{font-family:var(--display);font-weight:600;font-size:30px;letter-spacing:-.03em;line-height:1.08;margin-top:8px}
 .side p{color:var(--ink-2);font-size:15px;margin-top:10px}
@@ -327,6 +367,13 @@ footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;paddin
   table{font-size:14px}
   table.comm td:first-child{width:auto}
   .hide-m{display:none}
+  .bar .lbl{display:none}
+  .bar .wrap{padding-top:8px;padding-bottom:8px}
+  .seg{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;width:100%}
+  .seg::-webkit-scrollbar{display:none}
+  .seg button{flex:none;padding:7px 11px;font-size:13px}
+  .toc{padding-bottom:6px}
+  .adcall{flex-wrap:wrap}.adcall i{margin-left:0}
 }
 @media print{.bar{display:none}body{background:#fff}.box{break-inside:avoid}}
 `;

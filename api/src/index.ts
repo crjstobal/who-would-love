@@ -123,7 +123,7 @@ export class ReportWorkflow extends WorkflowEntrypoint<Env, Params> {
       try {
         const labels = Object.fromEntries(spec.spec.place_labels.map((p) => [p.raw, p.clean]));
         const kits = await Promise.all(segments.map((seg, i) => step.do(`ads ${i}`, RETRY, async () => {
-          const r = await makeAdKit(read.profile, seg, spec.spec, communities, labels, sharedQloo, claude());
+          const r = await makeAdKit(read.profile, seg, spec.spec, communities, labels, sharedQloo, claude(), onStep(seg.name));
           return { segment: seg.name, result: r.result, cost: usd(r.usage) };
         })));
         await step.do("save ads", async () => {
@@ -232,7 +232,8 @@ async function reportHtml(id: string, env: Env) {
   const row = await env.DB.prepare("SELECT html, ads_status, ads_html FROM reports WHERE id=? AND status='done'").bind(id).first<{ html: string; ads_status: string | null; ads_html: string | null }>();
   if (!row?.html) return new Response("Not ready", { status: 404 });
   const pending = row.ads_status === "running";
-  const ads = row.ads_status === "done" && row.ads_html ? row.ads_html : pending ? renderAdKitPending(id) : "";
+  const audiences = (row.html.match(/<section class="sec audience"/g) ?? []).length;
+  const ads = row.ads_status === "done" && row.ads_html ? row.ads_html : pending ? renderAdKitPending(id, audiences) : "";
   return new Response(row.html.replace(ADS_MARKER, () => ads), {
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": pending ? "no-store" : "public, max-age=300" },
   });

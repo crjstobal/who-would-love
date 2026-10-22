@@ -82,16 +82,29 @@ function audience(name: string, r: KitResult, b: Brand, open: boolean) {
 const SIDE = `<div class="side"><div class="num">Ads</div><h2>Ad kit</h2><p>Ready-to-run ads for each audience, written from what Qloo says they love, and checked by a critic agent before you see them.</p></div>`;
 
 export function renderAdKit(kits: { segment: string; result: KitResult }[], brand: Brand) {
-  return `<style>${CSS}</style><section class="sec adkit">${SIDE}<div class="blocks">${kits.map((k, i) => audience(k.segment, k.result, brand, i === 0)).join("")}</div></section>`;
+  return `<style>${CSS}</style><section class="sec adkit" id="ads">${SIDE}<div class="blocks">${kits.map((k, i) => audience(k.segment, k.result, brand, i === 0)).join("")}</div></section>`;
 }
 
-// Shown while the kit is being made; it polls and reloads the page when the kit is ready.
-export function renderAdKitPending(id: string) {
-  return `<style>${CSS}</style><section class="sec adkit">${SIDE}<div class="blocks"><div class="box o pending">${tag("o")}
+// Shown while the kit is being made: the creative and critic agents' latest steps, live, and a reload
+// once the kit is ready.
+export function renderAdKitPending(id: string, audiences: number) {
+  return `<style>${CSS}</style><section class="sec adkit" id="ads">${SIDE}<div class="blocks"><div class="box o pending">${tag("o")}
     <p class="lead sm">Writing your ads now.</p>
-    <p>A creative agent is turning each audience's taste into ad concepts, and a critic agent is checking them. This usually takes two to three minutes; the page updates by itself.</p>
-    <div class="adbar"><i></i></div></div></div></section>
-  <script>(function(){var t=setInterval(function(){fetch('/api/reports/${esc(id)}',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){if(d.ads_status!=='running'){clearInterval(t);location.reload()}}).catch(function(){})},6000)})()</script>`;
+    <p>A creative agent is turning each audience's taste into ads, and a critic agent is checking every draft. This usually takes about three minutes; the page updates by itself.</p>
+    <div class="adbar"><i></i></div>
+    <div class="adprog"><span id="adDone">0</span> of ${audiences} ad kits approved by the critic</div>
+    <div class="adacts" id="adActs"></div></div></div></section>
+  <script>(function(){
+    var L={get_local_taste:'Asked Qloo about a place',submit_kit:'Sent a draft to the critic'};
+    function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+    function tick(){fetch('/api/reports/${esc(id)}',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      if(d.ads_status!=='running'){location.reload();return}
+      var a=(d.activity||[]).filter(function(x){return L[x.tool]}),box=document.getElementById('adActs');
+      document.getElementById('adDone').textContent=a.filter(function(x){return x.saw==='critic approved'}).length;
+      box.textContent='';
+      a.slice(-4).reverse().forEach(function(x){var r=el('div','adact');r.append(el('span','seg',x.segment),el('div',null,L[x.tool]+': '+x.ask+' → '+x.saw),el('div','why','Why: '+x.why));box.append(r)});
+      setTimeout(tick,4000)}).catch(function(){setTimeout(tick,6000)})}
+    tick()})()</script>`;
 }
 
 const CSS = `
@@ -133,6 +146,10 @@ ul.vars{list-style:none}ul.vars li{padding:10px 0;border-bottom:1px solid var(--
 .adkit details.how{margin-top:20px;font-size:14.5px}.adkit details.how summary{cursor:pointer;font-weight:600}
 .adkit .pending .adbar{height:6px;background:var(--soft);border-radius:999px;overflow:hidden;margin-top:18px}
 .adkit .pending .adbar i{display:block;height:100%;width:40%;border-radius:999px;background:var(--ours);animation:adbar 1.6s ease-in-out infinite}
+.adkit .adprog{margin-top:14px;font-size:14px;color:var(--ink-2)}.adkit .adprog span{font-family:var(--mono);font-weight:600;color:var(--ours)}
+.adkit .adact{padding:10px 0;border-bottom:1px solid var(--soft);font-size:14px}.adkit .adact:last-child{border-bottom:0}
+.adkit .adact .seg{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-3)}.adkit .adact .why{font-size:13px;color:var(--ink-2);margin-top:2px}
+.adkit .adacts{margin-top:10px}
 @keyframes adbar{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
 @media (max-width:860px){.copy,.channels{grid-template-columns:1fr;gap:0}.mocks{grid-template-columns:minmax(0,1fr);gap:16px}.mocks .story{width:62%;justify-self:center}}
 `;
