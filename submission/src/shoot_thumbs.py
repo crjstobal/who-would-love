@@ -5,7 +5,7 @@ with sync_playwright() as p:
     b=p.chromium.launch()
     for name,w,h,u,pad,extra in [
         ("../devpost-thumbnail.png",1500,1000,48,90,""),
-        ("../video-thumbnail.png",1280,720,40,64,"document.getElementById('h1').innerHTML='Who would love<br><em>your app?</em>';document.getElementById('sub').textContent='Paste a link. Get the audiences, what they love, and where to find them.';"),
+        ("../video-thumbnail.png",1280,720,40,64,"document.getElementById('sub').textContent='Paste a link. Get who would love it, what they love, and ads written for their taste.';"),
     ]:
         pg=b.new_page(viewport={"width":w,"height":h})
         pg.goto(src); pg.evaluate(f"document.documentElement.style.cssText='--w:{w}px;--h:{h}px;--u:{u}px;--pad:{pad}px'"); pg.evaluate(extra or "0")

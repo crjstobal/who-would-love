@@ -3,28 +3,42 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Live demo](https://img.shields.io/badge/demo-whowouldlove.javi.link-ff6a3d.svg)](https://whowouldlove.javi.link)
 
-**Paste a link and discover who would love your app, product, service or game.**
+**Paste a link. Get who would love your product, and the ads to reach them.**
 
-Who Would Love reads a product page (or a whole website), matches it against real cultural taste
-data from [Qloo](https://www.qloo.com/), and builds an audience report on the spot: who the audience is,
-what else they love, where they live, and the communities where you can actually reach them, with
-ad targeting ready to paste into Meta Ads and Reddit Ads.
+Who Would Love reads a product page (or a whole website) and finds its audiences in the taste graph
+of [Qloo](https://www.qloo.com/): AI agents investigate each audience (what else they love, how they
+lean, where they live), find the communities where they gather, and then write an ad kit for each
+one: ad concepts with feed and story mockups, a Reddit post, a podcast host-read and city variants,
+all grounded in Qloo taste data and checked by a critic agent.
 
 Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/) (deadline 2026-10-30, 23:45 EDT).
 
-> Status (2026-10-13): live at https://whowouldlove.javi.link (sample report: /r/momentline).
+> Status (2026-10-22): live at https://whowouldlove.javi.link, with sample reports at
+> [/reports](https://whowouldlove.javi.link/reports) and planned pricing at [/pricing](https://whowouldlove.javi.link/pricing).
 
 ## How it works
 
 1. **Read the product.** An AI agent fetches the page with Firecrawl (renders JavaScript, maps the
    site for "whole website" mode, returns clean markdown) and Claude Opus 5.5 works out what the
    product is, its tone and who it seems built for.
-2. **Ask the taste graph.** The agent turns that into Qloo entities and tags, then asks Qloo for
-   affinities (what else these people love), demographics and where the taste is popular.
-3. **Find the doors.** The agent searches the open web for the communities where those people
-   gather (subreddits, newsletters, podcasts) and builds ready-to-paste ad targeting.
-4. **Report.** The report is built while the user watches a progress page, and lives at its own
-   link (`/r/<id>`). No signup, no email and no payment step.
+2. **Match.** The product's audiences and their starting points are looked up in Qloo; a model
+   checks every catalogue match and rejects the wrong ones.
+3. **Taste agents** (`src/taste-agent.ts`), one per audience, in parallel. With Qloo tools
+   (affinities by type and popularity band, demographics, heatmap, entity and tag search, change
+   the signal) and a budget of 24 calls, each agent decides what to ask, spots signals that mislead
+   (a seed that drags results abroad, flat scores) and corrects them. Every Qloo answer lands in a
+   ledger and the report is built from it, so a model never writes a Qloo number.
+4. **Find the doors.** One agent per audience searches the open web for the communities where those
+   people gather; every link is checked.
+5. **Report.** Written by the model, rendered with Qloo's real values, at its own link (`/r/<id>`).
+6. **Ad kit** (`src/ads.ts`), after the report is saved, on the same page. A creative director agent
+   per audience writes three concepts with mockups, a Reddit post, a podcast read and city variants
+   (it can ask Qloo what the audience loves in a place). It submits every draft to a critic tool:
+   code checks that each cited entity is real Qloo data for that audience and each community and
+   podcast comes from the report, then a model checks for clichés, unsupported claims and implied
+   endorsements. The director revises until the critic approves.
+
+The progress page shows the agents' latest steps live. No signup, no email and no payment step.
 
 Every claim in the report carries one of three labels, and the report can be filtered by them:
 
@@ -44,9 +58,10 @@ npm run report -- --from runs/<folder>   # reuse finished steps; delete a step's
 ```
 
 Each run writes to `runs/<folder>/` (ignored by git, because it holds Qloo responses):
-`00-page.json`, `01-profile.json`, `02-taste.json`, `03-communities.json`, `04-spec.json` and
-`report.html`. A full run takes about 6 minutes and costs about $2 (Claude tokens and web
-searches; Qloo is free during the hackathon).
+`00-page.json`, `01-profile.json`, `02-taste.json`, `03-communities.json`, `04-spec.json`,
+`05-ads.json` and `report.html`. A full run takes about 12 minutes and costs about $5 (Claude tokens
+and web searches; Qloo is free during the hackathon). With `--from`, an existing run gets its ad
+kit for about $1.3 without redoing the report.
 
 ## Mockups
 
@@ -66,12 +81,14 @@ browser ── whowouldlove.javi.link (Cloudflare Pages: web/)
           who-would-love-api (Worker: api/)  ── D1 "who-would-love" (reports, progress, HTML)
               │
               └─ Workflow "who-would-love-report": one durable, retried step per stage
-                   Firecrawl ─ Claude Opus 5.5 ─ Qloo ─ Claude + web search ─ Claude ─ render
+                   Firecrawl ─ Claude Opus 5.5 ─ taste agents x Qloo ─ community agents x web
+                   ─ report ─ (saved, readable) ─ creative + critic agents x Qloo ─ ad kit
 ```
 
 - `src/`: the pipeline, shared by the Worker and the local runner.
 - `api/`: Worker with the HTTP API (create report, status, HTML) and the Workflow.
-- `web/`: static site (home, progress page, about) and two Pages Functions.
+- `web/`: static site (home, progress, sample reports, pricing, about) and two Pages Functions.
+- Reports keep their inputs in D1 (`data`), so an ad kit or a re-render never needs a new run.
 - The API has no public URL; only the website reaches it, through a service binding.
 - Until 2026-11-01 (UTC) only judges can start new reports; saved reports and the sample stay public.
 - Abuse and cost limits: 1 report per IP per day, 3 per day in total (judges skip both with their

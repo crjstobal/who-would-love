@@ -13,7 +13,7 @@ body{background:#08121a;color:#fff;font-family:Geist,sans-serif;position:relativ
 .wrap{position:absolute;inset:0;padding:var(--pad);display:grid;grid-template-columns:1.05fr .95fr;gap:calc(var(--pad)*.8);align-items:center}
 .logo{display:flex;align-items:center;gap:.4em;font-family:'Bricolage Grotesque';font-weight:600;font-size:calc(var(--u)*1.25);letter-spacing:-.02em}
 .logo svg{height:1.5em}
-h1{font-family:'Bricolage Grotesque';font-weight:700;font-size:calc(var(--u)*2.55);line-height:.98;letter-spacing:-.045em;margin-top:calc(var(--u)*1.2)}
+h1{font-family:'Bricolage Grotesque';font-weight:700;font-size:calc(var(--u)*2.35);line-height:.98;letter-spacing:-.045em;margin-top:calc(var(--u)*1.2)}
 h1 em{font-style:normal;background:linear-gradient(90deg,#ffb86b,#ff6a3d 55%,#ff4f7a);-webkit-background-clip:text;color:transparent}
 p.sub{font-size:calc(var(--u)*.74);color:rgba(255,255,255,.78);margin-top:calc(var(--u)*1);line-height:1.4;max-width:30em}
 .by{margin-top:calc(var(--u)*1.3);display:inline-flex;gap:.6em;align-items:center;font-family:'Geist Mono';font-size:calc(var(--u)*.62);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6)}
@@ -21,7 +21,7 @@ p.sub{font-size:calc(var(--u)*.74);color:rgba(255,255,255,.78);margin-top:calc(v
 .cards{display:flex;flex-direction:column;gap:calc(var(--u)*.55)}
 .card{background:#fff;color:#15121b;border-radius:calc(var(--u)*.7);padding:calc(var(--u)*.6) calc(var(--u)*.8);box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
 .card:nth-child(1){transform:rotate(-1.6deg) translateX(-4%)}.card:nth-child(2){transform:rotate(1deg) translateX(5%)}.card:nth-child(3){transform:rotate(-.6deg)}
-.tag{display:inline-flex;align-items:center;gap:.45em;font-family:'Geist Mono';font-size:calc(var(--u)*.45);letter-spacing:.07em;text-transform:uppercase;padding:.35em .75em;border-radius:99px;margin-bottom:calc(var(--u)*.45)}
+.tag{white-space:nowrap;display:inline-flex;align-items:center;gap:.45em;font-family:'Geist Mono';font-size:calc(var(--u)*.45);letter-spacing:.07em;text-transform:uppercase;padding:.35em .75em;border-radius:99px;margin-bottom:calc(var(--u)*.45)}
 .tag::before{content:"";width:.55em;height:.55em;border-radius:50%;background:currentColor}
 .q{background:#ecf6f2;color:#2f7a63}.w{background:#eef2fe;color:#4062e0}.o{background:#fdf5e6;color:#b9780f}
 .row{display:flex;justify-content:space-between;align-items:center;gap:1em;font-size:calc(var(--u)*.52);padding:.28em 0;border-top:1px solid #f1eef4}
@@ -30,26 +30,37 @@ p.sub{font-size:calc(var(--u)*.74);color:rgba(255,255,255,.78);margin-top:calc(v
 .row .n{font-family:'Geist Mono';font-weight:500}
 .meter{width:4.5em;height:.4em;background:#f4f2f6;border-radius:9px;overflow:hidden;margin-left:auto}.meter i{display:block;height:100%;background:linear-gradient(90deg,#57a88d,#2f7a63)}
 .paste{font-family:'Geist Mono';font-size:calc(var(--u)*.5);background:#f4f2f6;border-radius:.6em;padding:.6em .8em;line-height:1.5}
-.by,.card:nth-child(3){display:none}</style></head><body>
+.by{display:none}
+.cards{position:relative;display:block;height:calc(var(--u)*12.5)}
+.qcard{position:absolute;top:0;left:-4%;width:74%;transform:rotate(-2deg)!important}
+.ad{position:absolute;right:-3%;top:calc(var(--u)*4.6);width:62%;background:#fff;color:#15121b;border-radius:calc(var(--u)*.6);overflow:hidden;box-shadow:0 40px 80px -30px rgba(0,0,0,.9);transform:rotate(1.6deg);font-size:calc(var(--u)*.42)}
+.ad-top{display:flex;align-items:center;gap:.6em;padding:.8em 1em}.ad-top img{width:2.4em;height:2.4em;border-radius:.6em}
+.ad-top b{display:block;font-size:1.15em}.ad-top small{color:#8b8693}
+.ok{white-space:nowrap;margin-left:auto;background:#e6f3ee;color:#2f7a63;font-weight:600;border-radius:99px;padding:.35em .8em;font-size:.95em}
+.ad-art{background:#2B2A3D;color:#fff;padding:1.2em 1.3em 1.3em;display:flex;flex-direction:column;gap:1em;aspect-ratio:1.5/1;justify-content:space-between}
+.ad-art img{width:30%;align-self:center;border-radius:22%;box-shadow:0 20px 40px -10px rgba(0,0,0,.7)}
+.ad-art span{font-family:'Bricolage Grotesque';font-weight:600;font-size:1.75em;line-height:1.1;letter-spacing:-.02em}
+.ad-bot{display:flex;justify-content:space-between;align-items:center;gap:1em;padding:.8em 1em;background:#f4f2f6}
+.ad-bot small{display:block;font-family:'Geist Mono';font-size:.78em;color:#8b8693;text-transform:uppercase;letter-spacing:.04em}.ad-bot b{font-size:1.1em}
+.cta{background:#F2C38B;font-weight:600;padding:.55em .9em;border-radius:.5em;white-space:nowrap}</style></head><body>
 <div class="mesh"><i></i><i></i><i></i></div><div class="grain"></div>
 <svg class="big" viewBox="0 0 40 48"><path d="M20 37 C 9 29, 3 22, 3.5 14 C 4 7, 10 4, 14.5 5 C 17.5 5.7, 19.2 7.6, 20 10" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round"/><path d="M20 10 C 21.5 5.5, 26 3.6, 30 4.6 C 35 5.8, 37.5 10.5, 36 15.5 C 34.5 20.5, 27 22.5, 23.5 26 C 21.2 28.3, 20.4 31, 20.2 33.5" fill="none" stroke="#ff6a3d" stroke-width="2.2" stroke-linecap="round"/><circle cx="20" cy="43.5" r="1.6" fill="#ff6a3d"/></svg>
 <div class="wrap">
   <div>
     <div class="logo"><svg viewBox="0 0 40 48"><path d="M20 37 C 9 29, 3 22, 3.5 14 C 4 7, 10 4, 14.5 5 C 17.5 5.7, 19.2 7.6, 20 10" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><path d="M20 10 C 21.5 5.5, 26 3.6, 30 4.6 C 35 5.8, 37.5 10.5, 36 15.5 C 34.5 20.5, 27 22.5, 23.5 26 C 21.2 28.3, 20.4 31, 20.2 33.5" fill="none" stroke="#ff6a3d" stroke-width="5.5" stroke-linecap="round"/><circle cx="20" cy="43.5" r="3.4" fill="#ff6a3d"/></svg>Who Would Love</div>
-    <h1 id="h1">Paste a link.<br>Meet who would <em>love it.</em></h1>
-    <p class="sub" id="sub">An AI agent reads your product page, asks Qloo's taste graph what your audiences love, and finds the communities where they gather.</p>
+    <h1 id="h1">Your audiences.<br><em>And their ads.</em></h1>
+    <p class="sub" id="sub">Paste a link. AI agents find who would love it in Qloo's taste graph, then write ads made for what they love.</p>
     <div class="by"><b>Qloo</b><b>Claude Opus 5.5</b><b>Firecrawl</b><b>Cloudflare</b></div>
   </div>
   <div class="cards">
-    <div class="card"><span class="tag q">Qloo data</span>
-      <div class="row"><span><small>Music</small>Gregory Alan Isakov</span><div class="meter"><i style="width:94%"></i></div><span class="n">0.94</span></div>
-      <div class="row"><span><small>Book</small>Atlas of the Heart</span><div class="meter"><i style="width:90%"></i></div><span class="n">0.90</span></div>
-      <div class="row"><span><small>Destination</small>Kyoto</span><div class="meter"><i style="width:98%"></i></div><span class="n">0.98</span></div></div>
-    <div class="card"><span class="tag w">Web research</span>
-      <div class="row"><span><small>Reddit · 2.5M members</small>r/LongDistance</span></div>
-      <div class="row"><span><small>Newsletter · 36,000+ readers</small>Dense Discovery</span></div></div>
-    <div class="card"><span class="tag o">Our interpretation</span>
-      <div class="paste">Meta Ads: Long-distance relationship, Bullet journal, Bon Iver, Brené Brown</div></div>
+    <div class="card qcard"><span class="tag q">Qloo data</span>
+      <div class="row"><span><small>Music</small>Bon Iver</span><div class="meter"><i style="width:97%"></i></div><span class="n">0.97</span></div>
+      <div class="row"><span><small>Film</small>Love, Rosie</span><div class="meter"><i style="width:91%"></i></div><span class="n">0.91</span></div></div>
+    <div class="ad">
+      <div class="ad-top"><img src="../../web/public/assets/momentline-icon.jpg"><div><b>Momentline</b><small>Sponsored</small></div><span class="ok">✓ Approved</span></div>
+      <div class="ad-art"><img src="../../web/public/assets/momentline-icon.jpg"><span>412 days since our first date. 9 days until I see you.</span></div>
+      <div class="ad-bot"><div><small>Ad kit</small><b>Count up. Count down. Same line.</b></div><span class="cta">Download</span></div>
+    </div>
   </div>
 </div>
 </body></html>

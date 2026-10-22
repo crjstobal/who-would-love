@@ -11,8 +11,8 @@ Who Would Love
 
 ## Elevator pitch (tagline, 200 characters max)
 
-Paste a link to anything you made. An AI agent asks Qloo's taste graph who would love it, what else
-they love, and where they gather, then hands you ready-to-use audiences.
+Paste a link to anything you made. AI agents find who would love it in Qloo's taste graph, then
+write ads made for what each audience loves, checked by a critic agent.
 
 ## Thumbnail
 
@@ -20,27 +20,30 @@ they love, and where they gather, then hands you ready-to-use audiences.
 
 ## Image gallery (in this order)
 
-1. `gallery/01-home.png`: the home page
-2. `gallery/02-progress.png`: the agent at work, live progress
-3. `gallery/03-short-version.png`: the short version and what we understood
-4. `gallery/04-audience.png`: one audience, with its Qloo taste profile
-5. `gallery/05-communities.png`: where to reach them and ready-to-paste targeting
-6. `gallery/06-filter.png`: filtering the report to Qloo data only
+1. `gallery/01-home.png`: paste a link, get your audiences and their ads
+2. `gallery/02-progress-agents.png`: the taste agents at work, live, one per audience
+3. `gallery/03-summary.png`: the report, with its section menu and the ad kit one click away
+4. `gallery/04-taste-agent.png`: how the agent investigated one audience in Qloo, step by step
+5. `gallery/05-ad-kit.png`: an ad concept with feed and story mockups, grounded in Qloo taste
+6. `gallery/06-critic.png`: the critic agent sending drafts back until they hold up
+7. `gallery/07-samples.png`: sample reports for a game, an app and a kettle
+8. `gallery/08-pricing.png`: pricing, with the costs we measured per report
 
 ## Video demo link
 
-YouTube URL of `video/who-would-love-demo.mp4` (upload as Public; add `video/who-would-love-demo.srt`
-as English captions and `video-thumbnail.png` as the custom thumbnail).
+Optional for this hackathon. The current `video/who-would-love-demo.mp4` shows the version before
+taste agents and ad kits; either re-record it or leave this field empty.
 
 ## Try it out links
 
 - https://whowouldlove.javi.link
+- https://whowouldlove.javi.link/reports
 - https://github.com/crjstobal/who-would-love
 
 ## Built with
 
-qloo, claude, anthropic, claude-opus-5.5, firecrawl, cloudflare-workers, cloudflare-workflows,
-cloudflare-pages, cloudflare-d1, typescript, zod, openstreetmap
+qloo, claude, anthropic, claude-opus-5.5, ai-agents, tool-use, firecrawl, cloudflare-workers,
+cloudflare-workflows, cloudflare-pages, cloudflare-d1, typescript, zod, openstreetmap
 
 ---
 
@@ -50,159 +53,173 @@ cloudflare-pages, cloudflare-d1, typescript, zod, openstreetmap
 
 Most indie makers advertise where everyone in their category already does. A day-counter app ends
 up targeting "productivity users", a roguelike targets "gamers", and both pay to shout into the
-same crowded room as their competitors.
+same crowded room as their competitors, with the same generic ads.
 
-The interesting audience is usually one step sideways. The people who would love a calm, poetic
-countdown app are not productivity nerds: they are long-distance couples, sentimental date keepers
-and people who listen to Sufjan Stevens. You cannot find that with keyword research, and an LLM on
-its own will happily invent it. You need real data about what groups of people love. That is
-exactly what Qloo's taste graph is.
+The interesting audience is usually one step sideways, and so is the ad that reaches it. The people
+who would love a calm, poetic countdown app are not productivity nerds: they are long-distance
+couples who listen to Bon Iver and watch Love, Rosie. You do not reach them with "Track your
+dates!"; you reach them with "412 days since our first date. 9 days until I see you."
+
+You cannot find that with keyword research, and an LLM on its own will happily invent it. You need
+real data about what groups of people love. That is exactly what Qloo's taste graph is, and big
+advertisers already use it this way: JCDecaux has planned hyper-local out-of-home campaigns with
+Qloo's taste data since 2020. We wanted to give the same thing to one maker with one product.
 
 ### What it does
 
-You paste a link to a product page (an App Store listing, a Steam page, a landing page) or a whole
-website. About eight minutes later you get an audience report at its own shareable link:
+Paste a link to a product page (an App Store listing, a Steam page, a shop page, a landing page)
+or a whole website. You get an audience report at its own shareable link, and then an ad kit for
+every audience in it.
 
-- **The short version**: who would love it and the one thing to do first.
-- **What we understood**: how the agent read your page, and every starting point it matched in
-  Qloo. Anything Qloo does not have is listed as "not in Qloo" instead of being guessed.
-- **Three or four distinct audiences**, each one backed by a quote from your page, and each with its
-  own Qloo taste profile:
-  - what else they love across music, books, film, TV, podcasts, games, brands, people and
-    destinations, with Qloo affinity scores;
-  - how they lean by age and gender;
-  - where in your main market that taste is strongest.
-- **Where to reach them**: real subreddits, newsletters, podcasts, forums and Discord servers,
-  with sizes when found, how to show up without spamming, and every link checked.
-- **Ready-to-paste targeting**: Meta Ads interests, an age and gender setting, Reddit Ads
-  communities and a first creative angle for each audience.
-- **What your page does not say**: questions these audiences will have that your page leaves open.
+**The report** (about 8 minutes):
+
+- **Three or four distinct audiences**, each backed by a quote from your page.
+- For each one, a **taste agent investigated it in Qloo**: what else they love across music, books,
+  film, TV, podcasts, games, brands, people and destinations (with Qloo affinity scores), how they
+  lean by age and gender, and where in your market that taste is strongest. Every step the agent
+  took, and why, is listed under the audience.
+- **Where to reach them**: real subreddits, newsletters, podcasts and forums, with sizes when
+  found, how to show up without spamming, and every link checked.
+- Ready-to-paste Meta and Reddit targeting, a first plan, and what your page does not say.
+
+**The ad kit** (about 3 more minutes, on the same page):
+
+- **Three ad concepts per audience**, each with feed (1:1) and story (9:16) mockups built from your
+  product image, copy ready to paste, and the Qloo entities it rests on, with their real scores.
+- **A Reddit post** for one of that audience's communities and **a 30-second podcast host-read**
+  for a show they love.
+- **City variants** where Qloo shows that taste really differs in a place.
+- **What to stay away from** with this audience.
+- Every kit is **checked by a critic agent** before you see it, and the report shows each round.
 
 Every block is labelled **Qloo data**, **Web research** or **Our interpretation**, and the report can
 be filtered by label, so you always know what is measured, what was found and what is advice.
 
-No signup, no email, no payment.
-
 ### How Qloo makes the difference
 
-Without Qloo, this product is an LLM guessing at personas. With Qloo, each audience is grounded in
-measured cultural affinity, and the best findings come from following taste, not keywords:
+Without Qloo, this is an LLM guessing at personas and writing generic ads. With Qloo, each audience
+and each ad is grounded in measured cultural affinity:
 
-- For **Momentline** (a real day-counter app), Qloo's taste profile of the "sentimental date
-  keepers" audience is led by Gregory Alan Isakov, Atlas of the Heart and The Time Traveler's Wife.
-  The agent then went looking for those fans and found **r/Sufjan**, a community no keyword search
-  for "countdown app" would ever return.
-- For **Hades** (Steam), the "roguelike run grinders" audience loves Slay the Spire, Enter the
-  Gungeon and Nuclear Throne (Qloo videogame affinities), which turns into a concrete Meta Ads
-  interest list and r/roguelites.
-- Qloo's heatmap shows where each taste concentrates. For Momentline's combined audience it points
-  to dark-sky country (Death Valley, the Scottish Highlands, Jasper), which is why the report
-  suggests leading with the app's stargazing feature.
+- For **Momentline** (a real day-counter app), the "sentimental date keepers" audience loves Bon
+  Iver (0.97), Love, Rosie (0.91) and Esther Perel's *Where Should We Begin?* (0.90). So the ad does
+  not list features: it shows one bittersweet pair of dates, in a hushed indie-folk mood. The same
+  taste led the community agent to **r/Sufjan**, which no keyword search for "countdown app" returns.
+- For **Hades II** (Steam), the run-and-build audience loves Noita (0.89), Enter the Gungeon (0.89)
+  and Twitch (0.97). The ad pitches the game as a build sandbox ("Three gods, one run. How far can
+  you break it?") styled like a creator clip, not a cinematic trailer.
+- For the **Fellow Stagg kettle**, the pour-over audience loves Verve and Stumptown; the creative
+  agent asked Qloo about Marin County and Portland before writing city variants, and the critic
+  rejected a draft that named those roasters next to the kettle, because it read as an endorsement.
 
-### Qloo workflows we use, and why
+### The agents, and what makes them agents
 
-A single report makes roughly 140 Qloo API calls, all server side through the hackathon REST API
-(`hackathon.api.qloo.com`). They map onto the kit's workflows like this:
+Each report runs on a durable Cloudflare Workflow, but the Qloo work is done by agents that decide
+for themselves what to ask, with Claude Opus 5.5 tool use:
 
-| Kit workflow | Qloo endpoint | What we use it for |
-| --- | --- | --- |
-| describe (entity resolution) | `GET /search` | Turn each proposed starting point (a book, a show, a brand) into a Qloo entity. The model then checks every candidate and rejects false matches. |
-| find_tags | `GET /v2/tags` | Resolve the product's themes (for example "long distance relationship") into Qloo tags. |
-| recommend | `GET /v2/insights` with `filter.type=urn:entity:*` | What else each audience loves, in 9 entity types, in three lists: overall, a niche popularity band (`filter.popularity.min/max`) and inside the main market (`signal.location.query`). |
-| audience_demographics | `GET /v2/insights` with `filter.type=urn:demographics` | How each audience leans by age and gender. |
-| where_popular | `GET /v2/insights` with `filter.type=urn:heatmap` | Where each audience's taste is strongest, per market. We turn the coordinates into place names with OpenStreetMap. |
-
-Why three lists per type: in our tests, plain affinities were dominated by household names (Tesla,
-Google), the niche band surfaced the actionable picks, and reading inside the main market stopped a
-single seed (for example Muji) from dragging every result to Japan. The writing step chooses from
-all three.
+1. **Taste agents, one per audience, in parallel.** Tools: read affinities (any of 9 entity types,
+   mainstream, niche popularity band or inside the main market), demographics, heatmap, search the
+   catalogue, search tags, and change the signal. Budget: 24 Qloo calls each. They look for signals
+   that mislead (a seed loved mostly abroad, flat scores, results about another audience), change
+   the signal and read again. Every Qloo answer lands in a ledger, and the report is built from the
+   ledger, so **a model never writes a Qloo number**. If an agent fails, a fixed reading runs instead.
+2. **Community agents**, one per audience, with web search and web fetch, guided by that audience's
+   Qloo affinities. Every link is checked.
+3. **Creative director agents**, one per audience, after the report is saved. Tools: ask Qloo what
+   this audience loves in a specific place, and submit the kit to the critic.
+4. **The critic** is a tool the director cannot talk past. Code checks first: every cited entity id
+   must be real Qloo data for this audience, every community and podcast must come from the report,
+   hooks and headlines must fit. Then a second model checks for clichés, stereotypes, claims the
+   product page does not support, and implied endorsements. The director revises until approved.
 
 ### Example: request to result (redacted)
 
-Starting from the Hades audience, after the agent matched its seeds in Qloo:
+The taste agent for Momentline's "design-minded minimalists" started from Dieter Rams, Muji and
+*The Design of Everyday Things*:
 
 ```
 GET https://hackathon.api.qloo.com/v2/insights
-    ?filter.type=urn:entity:videogame
-    &signal.interests.entities=<Hades entity id>
-    &take=8
+    ?filter.type=urn:entity:artist
+    &signal.interests.entities=<Dieter Rams>,<Muji>,<The Design of Everyday Things>
+    &filter.popularity.min=0.3&filter.popularity.max=0.9
+    &take=15
 X-Api-Key: <redacted>
 ```
 
-Result (names and affinity):
+Result: delofamilia (0.91), TETSU69 (0.90), つばき (0.90). The agent's note: "Muji drags music to
+Japan." It searched the catalogue for Kinfolk, swapped Muji for Kinfolk, added the Minimalist
+Design tag (`signal.interests.tags`) and read again: Chris Staples (0.94), Landlady (0.93), Kacey
+Johansing (0.93). The report shows Muji as "dropped by the agent", with the reason.
 
-```
-Death's Door 0.87 · Outer Wilds 0.87 · Loop Hero 0.85 · Inscryption 0.85
-Cult of the Lamb 0.84 · Dead Cells 0.84 · Slay the Spire 0.83
-```
+### Qloo endpoints we use, and why
 
-In the report, picks like these become the "They also love" table (scores copied straight from
-Qloo), a Meta Ads interest list, and search leads for the community step.
+A report makes roughly 130 to 150 Qloo calls, all server side through `hackathon.api.qloo.com`.
+
+| What | Qloo endpoint | Used for |
+| --- | --- | --- |
+| Entity resolution | `GET /search` | Turn each proposed starting point into a Qloo entity; a model checks every candidate and rejects false matches. The taste agents also search to add entities. |
+| Tags | `GET /v2/tags` | Resolve the product's themes into Qloo tags, which agents can add to the signal. |
+| Affinities | `GET /v2/insights`, `filter.type=urn:entity:*` | What each audience loves; niche band with `filter.popularity.min/max`; main market and city variants with `signal.location.query`. |
+| Demographics | `GET /v2/insights`, `filter.type=urn:demographics` | How each audience leans by age and gender. |
+| Heatmap | `GET /v2/insights`, `filter.type=urn:heatmap` | Where each taste is strongest; coordinates become place names with OpenStreetMap. |
 
 ### How we built it
 
-The agent runs as a durable **Cloudflare Workflow**, one retried step per stage:
+TypeScript end to end. Cloudflare Pages for the site, a Worker for the API (reachable only through
+a service binding, so keys never reach the browser), Workflows for the long job with per-step
+retries, D1 for reports. Claude Opus 5.5 for every model step, with tool use for the agents and
+structured outputs (Zod) elsewhere. Firecrawl reads the page. The progress page shows the agents'
+latest steps live. The same pipeline runs locally from the command line.
 
-1. **Read.** Firecrawl fetches the page (or the home page plus up to four key pages). Claude Opus
-   5.5 describes the product and splits the likely audience into 3 or 4 segments, each backed by a
-   quote from the page, and proposes Qloo starting points for each.
-2. **Match.** Each starting point is looked up in Qloo and Claude checks every candidate. Catalogue
-   search is fuzzy ("Bullet Journal" can return "The Wall Street Journal"), so wrong matches are
-   rejected and listed, never used.
-3. **Ask the taste graph.** For each audience: affinities in 9 entity types and three popularity
-   views, demographics and a heatmap. Then the whole audience across up to three markets.
-4. **Find the doors.** One Claude agent per audience, in parallel, with web search and web fetch,
-   guided by that audience's Qloo affinities. Every link it returns is checked.
-5. **Write.** Claude writes the report. It picks Qloo results by entity id and the renderer copies
-   the real values, so **the model cannot invent a Qloo number**.
+### Business model
 
-Stack: TypeScript end to end. Cloudflare Pages for the site, a Worker for the API (reachable only
-through a service binding, so API keys never reach the browser), Workflows for the agent, D1 for
-reports. Structured outputs (Zod) for every model step. The same pipeline also runs locally from the
-command line.
+The demo is free while the hackathon is judged. After it: **$39 once** for a launch report with its
+ad kit, **$99 a month** (Studio: 5 reports, monthly refresh of taste and ads, and an ad check for
+your own ads) and **$299 a month** (Agency: 25 reports, your brand, your team). We measured what a
+report costs us in production: $4.70 to $5.20 in model and search usage, which leaves 57% to 87%
+gross margin. The prices assume a usage agreement with Qloo, whose commercial pricing is not public;
+we say so on the pricing page rather than show numbers that only work on a free key.
 
 ### Challenges we ran into
 
-- **Fuzzy entity search.** "Day One" (the journaling app) is not in Qloo, and searching for it
-  returns Formula One and Hay Day. We added a verification step where the model must pick the exact
-  thing or reject it, and the report shows what was rejected.
-- **Generic signals give generic answers.** A single broad tag returned the same affinity for every
-  result; one mixed set of seeds let the loudest audience drown the others. Splitting into audiences,
-  each with its own seeds, fixed both.
-- **Silent failures.** Invalid parameters are ignored without an error, and `video_game` is
-  rejected while `videogame` works. We probed every endpoint with real calls before trusting it.
-- **Long jobs on the edge.** A report takes minutes and around 200 outbound requests, so it runs as
-  a Workflow with per-step retries, a live progress page and a permanent link.
+- **Fuzzy entity search.** "Day One" (the journaling app) is not in Qloo, and searching returns
+  Formula One and Hay Day. A model must pick the exact thing or reject it, and the report shows what
+  was rejected.
+- **Signals that mislead.** One seed can drag a whole audience to another country (Muji to Japan)
+  or flatten every score. A fixed pipeline cannot notice; this is why the Qloo work became an agent.
+- **Ads that sound right and are not.** First drafts named real brands next to the product, invented
+  a star rating, and promised features the page never mentions. The critic, with code checks it
+  cannot argue with, is what made the ads safe to show.
+- **Long jobs on the edge.** Around 200 outbound requests and four agents in parallel, so the work
+  runs as a Workflow with retries, one shared Qloo client that keeps requests in order, and a live
+  progress page.
 
 ### Accomplishments that we're proud of
 
-- It works on very different products: an iPhone app, a Steam game, a Mac utility website.
-- Honest by design: three provenance labels, a source filter, rejected matches shown, numbers that
-  cannot be hallucinated.
-- The findings are useful in practice: r/Sufjan for a countdown app is the kind of idea a maker
-  would never have had alone.
+- It works on very different products: a Steam game, an iPhone app, a kitchen kettle.
+- The critic catches real problems, and you can watch it do so.
+- Honest by design: provenance labels, rejected and dropped seeds shown, every agent step listed,
+  numbers that cannot be hallucinated.
 
 ### What we learned
 
-Taste data is most valuable sideways. The obvious audience is easy; Qloo is what finds the
-neighbouring one, and that is where the cheap, uncrowded reach is.
+Taste data is most valuable sideways, and it is just as useful for what an ad says as for who sees
+it. The obvious audience is easy; Qloo finds the neighbouring one and tells you how to talk to it.
 
 ### What's next
 
-- Email delivery and a PDF version of the report.
-- Compare two products, or your product against a competitor (Qloo's compare analysis).
-- Track an audience over time with Qloo trends.
+- Ad check: paste your own ad and test it against each audience's taste.
+- Monthly refresh, so taste and ads stay current.
+- Image and video generation for the concepts, from the scene the agent describes.
 
 ### Known limitations (what the result does not establish)
 
 - Qloo results describe what groups of people tend to like. They do not describe or predict any
   single person, and an affinity is not a guarantee that someone will buy.
-- The report depends on how the agent read the page and which starting points Qloo had. Section 02
-  of every report shows both, so a wrong reading is visible.
-- Community sizes and rules change; links are checked when the report is made, not afterwards.
+- The report depends on how we read the page and which starting points Qloo had. Section 02 of every
+  report shows both, so a wrong reading is visible.
+- Ads are concepts and mockups, not tested creatives. They are a strong first draft, not a result.
+- Community sizes and rules change; links are checked when the report is made.
 - Demographic leans are relative to Qloo's average, not absolute shares of an audience.
-- To keep costs bounded the public demo allows a few reports per day (judges can skip this; see the
-  testing instructions). A link analysed in the last 30 days returns the saved report instantly.
 
 ### Privacy
 
@@ -214,20 +231,21 @@ lives only on the server.
 
 ## Testing instructions (for judges)
 
-1. Open **https://whowouldlove.javi.link/?code=JUDGE_CODE_HERE**. The code lifts the daily limits on
-   this device.
-2. Paste a link to a product page (an App Store listing, a Steam page or a landing page) and press
-   "Find who would love it". Choose "the whole website" for a home page.
-3. Watch the progress page; a report takes about 8 minutes. You can close the tab and come back to
-   the same link.
-4. In the report, use the "Show" filter to see only Qloo data, only web research or only our
-   interpretation.
+1. Open **https://whowouldlove.javi.link/?code=JUDGE_CODE_HERE**. The code lifts every limit on this
+   device. (Without it, new reports open to the public on 2026-11-01 with a small daily limit.)
+2. Paste a link to a product page (an App Store listing, a Steam page, a shop or landing page) and
+   press "Find who would love it". Choose "the whole website" for a home page.
+3. Watch the progress page: you will see the taste agents' steps live. The report opens after about
+   8 minutes; the ad kit fills in on the same page about 3 minutes later. You can close the tab and
+   come back to the same link.
+4. In the report, use the section menu (the ad kit is highlighted), open "How the agent investigated
+   this audience" under any audience, and "How the creative agents worked" inside any ad kit.
 
-Finished reports to look at right away:
+Finished reports to look at right away (all at https://whowouldlove.javi.link/reports):
 
+- Hades II (Steam game): https://whowouldlove.javi.link/r/9f615f1d8786
 - Momentline (iPhone app): https://whowouldlove.javi.link/r/momentline
-- Momentline again, the run shown in the video: https://whowouldlove.javi.link/r/5cc02d745698
-- Hades (Steam game): https://whowouldlove.javi.link/r/4ac006bb911a
+- Fellow Stagg EKG kettle (shop page): https://whowouldlove.javi.link/r/c8bd04f638f4
 
 ## "Was this project significantly updated during the submission period?"
 
