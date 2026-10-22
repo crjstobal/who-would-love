@@ -184,13 +184,14 @@ export function renderReport(input: {
   </div>
 </header>
 <div class="bar"><div class="wrap">
-  <span class="lbl">Show</span>
+  <a class="lbl backtop" href="#">↑ Back to top</a>
+  <div class="filter"><span class="lbl">Show</span>
   <div class="seg" role="group" aria-label="Filter by source">
     <button type="button" aria-pressed="true" data-f="all">Everything</button>
     <button type="button" aria-pressed="false" data-f="q"><i style="background:var(--qloo)"></i>Qloo data</button>
     <button type="button" aria-pressed="false" data-f="w"><i style="background:var(--web)"></i>Web research</button>
     <button type="button" aria-pressed="false" data-f="o"><i style="background:var(--ours)"></i>Our interpretation</button>
-  </div>
+  </div></div>
 </div>
 <div class="wrap tocwrap"><button type="button" class="tocbtn" id="tocL" aria-label="Earlier sections" hidden>‹</button><nav class="toc" id="toc" aria-label="Sections">${nav.map((x) => `<a href="#${x.id}"${x.hot ? ' class="hot"' : ""}>${x.hot ? "✦ " : ""}${x.label}</a>`).join("")}</nav><button type="button" class="tocbtn" id="tocR" aria-label="Later sections" hidden>›</button></div>
 </div>
@@ -240,6 +241,7 @@ tr.onclick=()=>toc.scrollBy({left:toc.clientWidth*.6,behavior:'smooth'});
 const toTop=document.getElementById('totop');
 addEventListener('scroll',()=>toTop.classList.toggle('show',scrollY>700),{passive:true});
 toTop.onclick=()=>scrollTo({top:0,behavior:'smooth'});
+document.querySelector('.backtop').onclick=e=>{e.preventDefault();scrollTo({top:0,behavior:'smooth'})};
 btns.forEach(b=>b.addEventListener('click',()=>{links.forEach(a=>{const s=document.getElementById(a.getAttribute('href').slice(1));a.classList.toggle('off',!s||s.classList.contains('hidden'))});spy();}));
 function copy(btn){
   const t=btn.previousElementSibling.textContent;
@@ -289,6 +291,8 @@ main{padding:24px 0 80px}
 .sec.hidden{display:none}
 @media (min-width:861px){.side{position:sticky;top:calc(var(--barh,124px) + 16px);align-self:start}}
 .sec{scroll-margin-top:calc(var(--barh,124px) + 8px)}
+.filter{display:flex;align-items:center;gap:10px}
+.bar a.backtop{text-decoration:none;color:var(--ink-2);font-weight:500}.bar a.backtop:hover{color:var(--accent-2)}
 .toc{position:relative;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:0 0 10px;margin-top:-4px}
 .toc::-webkit-scrollbar{display:none}
 .toc a{flex:none;font-size:13.5px;color:var(--ink-2);text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s}
@@ -391,6 +395,7 @@ footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;paddin
   table.comm td:first-child{width:auto}
   .hide-m{display:none}
   .bar .lbl{display:none}
+  .filter{width:100%}
   .bar .wrap{padding-top:8px;padding-bottom:8px}
   .seg{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;width:100%}
   .seg::-webkit-scrollbar{display:none}
