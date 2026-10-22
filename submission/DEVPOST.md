@@ -31,8 +31,9 @@ write ads made for what each audience loves, checked by a critic agent.
 
 ## Video demo link
 
-Optional for this hackathon. The current `video/who-would-love-demo.mp4` shows the version before
-taste agents and ad kits; either re-record it or leave this field empty.
+YouTube URL of `video/who-would-love-demo.mp4` (56 seconds; upload as Public, add
+`video/who-would-love-demo.srt` as English captions and `video-thumbnail.png` as the custom
+thumbnail). Script and how it was made: `VIDEO-SCRIPT.md`.
 
 ## Try it out links
 
@@ -246,6 +247,7 @@ Finished reports to look at right away (all at https://whowouldlove.javi.link/re
 - Hades II (Steam game): https://whowouldlove.javi.link/r/9f615f1d8786
 - Momentline (iPhone app): https://whowouldlove.javi.link/r/momentline
 - Fellow Stagg EKG kettle (shop page): https://whowouldlove.javi.link/r/c8bd04f638f4
+- Allbirds Men's Tree Runner (shop page, the one in the video): https://whowouldlove.javi.link/r/a2da04e907fe
 
 ## "Was this project significantly updated during the submission period?"
 

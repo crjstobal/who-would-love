@@ -1,0 +1,54 @@
+{
+  "voice_id": "iP95p4xoKVk53GoZ742B",
+  "note": "voice is what the TTS reads (Qloo is spelled 'Clue' so it is said right); caption is what appears on screen. Each scene lasts its voice plus pad seconds.",
+  "scenes": [
+    {
+      "id": "paste",
+      "pad": 0.6,
+      "voice": "Paste a link to anything you made. Here: Allbirds Tree Runners.",
+      "caption": "Paste a link to anything you made. Here: Allbirds Tree Runners."
+    },
+    {
+      "id": "agents",
+      "pad": 0.5,
+      "voice": "AI agents take it to Clue's taste graph, which knows what real groups of people love: music, film, brands, places. They decide what to ask, and fix the signal when the data looks off.",
+      "caption": "AI agents take it to Qloo's taste graph, which knows what real groups of people love: music, film, brands, places. They decide what to ask, and fix the signal when the data looks off."
+    },
+    {
+      "id": "taste",
+      "pad": 0.5,
+      "voice": "So every audience is measured, not guessed. These are the things this group really loves, with Clue's scores. Without Clue, this would just be an AI making things up.",
+      "caption": "So every audience is measured, not guessed. These are the things this group really loves, with Qloo's scores. Without Qloo, this would just be an AI making things up."
+    },
+    {
+      "id": "targeting",
+      "pad": 0.5,
+      "voice": "It becomes targeting you can paste straight into Facebook and Reddit ads.",
+      "caption": "It becomes targeting you can paste straight into Facebook and Reddit ads."
+    },
+    {
+      "id": "ads",
+      "pad": 0.6,
+      "voice": "Then the part nobody else does: ads, written for each audience's taste. Three concepts each, in feed and story formats, ready to run.",
+      "caption": "Then the part nobody else does: ads, written for each audience's taste. Three concepts each, feed and story, ready to run."
+    },
+    {
+      "id": "evidence",
+      "pad": 0.4,
+      "voice": "Every ad shows the Clue taste it was built on.",
+      "caption": "Every ad shows the Qloo taste it was built on."
+    },
+    {
+      "id": "critic",
+      "pad": 0.6,
+      "voice": "And a critic agent sends back anything that overpromises, stereotypes, or cites data Clue doesn't have.",
+      "caption": "And a critic agent sends back anything that overpromises, stereotypes, or cites data Qloo doesn't have."
+    },
+    {
+      "id": "close",
+      "pad": 1.6,
+      "voice": "Who Would Love. Who'd love what you made, and the ads to reach them.",
+      "caption": ""
+    }
+  ]
+}

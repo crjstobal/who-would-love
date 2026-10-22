@@ -12,3 +12,6 @@ CLAUDE.md
 
 # Large demo video, uploaded to YouTube instead
 submission/video/
+submission/video-src/raw/
+submission/video-src/out/
+submission/video-src/progress.log

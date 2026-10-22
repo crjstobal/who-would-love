@@ -1,41 +1,45 @@
 # Video: script and production notes
 
-Final file: `video/who-would-love-demo.mp4` (1920x1080, 30 fps, 2:24, H.264 + AAC, no music).
+Final file: `video/who-would-love-demo.mp4` (1920x1080, 30 fps, 0:56, H.264 + AAC, no music).
 Captions: burned in, and also as `video/who-would-love-demo.srt` for YouTube.
 Custom thumbnail: `video-thumbnail.png` (1280x720).
 
-The video is optional for this hackathon, but the rules say judges may judge only from the text,
-images and video, so it matters.
+The video is optional for this hackathon, so it is short and goes straight to the point: paste a
+link, Qloo-grounded audiences, ready-to-paste targeting, and ads written from Qloo taste.
 
 ## How it was made
 
-- Every screen is the live site (whowouldlove.javi.link), recorded from Chromium at 1080p with a
-  real report made for the video (Momentline, report `/r/5cc02d745698`, about 7 minutes).
-- Narration: ElevenLabs premade voice "Chris" (not Javi's cloned voice). For the voice, "Qloo" is
-  written "Clue" and "r/" as "r slash" so it is pronounced right; captions keep the real spelling.
-- No music, so there is no copyright risk.
-- Everything is reproducible from the scripts in the session scratchpad (recorder, scene timing,
-  assembly with ffmpeg). If you re-record the voice yourself, keep each line within its time slot.
+Everything is in `video-src/` and reproducible:
+
+- `script.json`: the narration per scene. `voice` is what the TTS reads ("Qloo" is spelled
+  "Clue" so it is pronounced right); `caption` is what appears on screen.
+- `voice.py`: one clip per scene with ElevenLabs (premade voice "Chris"), key read from AWS SSM.
+- `record_progress.py <report id>`: records the live progress page of a real run, start to finish.
+- `record_scenes.py <report id>`: records every other scene from the live site at 1080p, timed to
+  its narration, plus the closing card (`close.html`).
+- `assemble.py`: cuts the scenes, speeds up and zooms the progress recording, overlays the
+  captions, adds the voice, and writes the `.mp4` and `.srt`.
+
+The report shown is a real production run made for the video: Allbirds Men's Tree Runner,
+https://whowouldlove.javi.link/r/a2da04e907fe (also in the sample gallery). No music, so there is
+no copyright risk.
 
 ## Script
 
-| Start | Scene | On screen | Voice (English) |
-| --- | --- | --- | --- |
-| 0:00.0 | hero | Home page hero, untouched: the heart-question mark draws itself, the last word rotates (your app, your service...). | You made something. An app, a game, a newsletter. That was the hard part. Or so you thought. Now you need the people who would love it. |
-| 0:09.8 | form | Scroll to the form, type the Momentline App Store link, keep 'Just this page', press 'Find who would love it'. | Who Would Love finds them. Paste a link. Here, it's Momentline, a little day-counter app I made. |
-| 0:16.3 | progress | Progress page, time-lapse of the real 7-minute run (one still every 3 s). | An AI agent reads the page, works out what the product is, and splits the likely audience into distinct groups. For each group, it picks starting points in Qloo's taste graph, checks every match, and asks Qloo what else these people love. |
-| 0:31.3 | short | Report cover, then 01 The short version with the three numbers. | Seven minutes later, the report. The short version first: four audiences, and the one to start with. |
-| 0:39.5 | understood | 02 What we understood: the Qloo starting points; highlight the 'not in Qloo' chips. | It shows exactly how it read your page, and every starting point it matched in Qloo. When Qloo has no exact match, it says so. It never guesses. |
-| 0:50.5 | taste | Audience 1, Sentimental milestone keepers: highlight A Million Little Things, Gabrielle Aplin, Life is Strange, then the demographics, then the places. | Each audience gets its own taste profile, straight from Qloo. The sentimental milestone keepers love A Million Little Things, Gabrielle Aplin and Life is Strange. They lean young and female, and the taste is strongest in New York, Nashville and Chicago. |
-| 1:10.6 | doors | Same audience, Web research table: highlight r/LongDistance, then r/lifeisstrange. | Then the agent goes looking for the doors, and checks every link. r/LongDistance is the obvious one. r/lifeisstrange is not. It only shows up because Qloo knows this audience loves that game. |
-| 1:24.1 | where | Audience 2, Stargazers: highlight 'Where in United States this taste is strongest' (Cape Canaveral, Death Valley, Monument Valley). | Taste even tells you where. The stargazers cluster around Cape Canaveral, Death Valley and Monument Valley. Exactly where you'd point a telescope. |
-| 1:33.4 | use | Ready-to-paste targeting block; then click the 'Qloo data' filter and scroll the filtered report. | It all ends in something you can use today: interests to paste into Meta Ads, Reddit communities, and a first creative. And every block is labelled Qloo data, web research, or our interpretation, so you can filter the report down to just the measured taste. |
-| 1:52.3 | arch | Animated card: five steps inside the Cloudflare Workflow box, revealed in sync with the voice. | Under the hood, a Cloudflare Workflow runs each stage as a durable step. Firecrawl reads. Claude Opus 5.5 plans and checks. About a hundred and forty Qloo calls bring affinities, demographics and heatmaps. And Claude, with web search, finds the communities. No signup, and no personal data ever goes to Qloo. |
-| 2:17.3 | close | Closing card: logo draws, tagline, URL whowouldlove.javi.link. | Somebody out there would love what you made. Go find them. |
+| Scene | On screen | Voice |
+| --- | --- | --- |
+| paste | Home: the Allbirds link is typed into the form. | Paste a link to anything you made. Here: Allbirds Tree Runners. |
+| agents | The live progress page, sped up: the taste agents' steps as they happen. | AI agents take it to Qloo's taste graph, which knows what real groups of people love: music, film, brands, places. They decide what to ask, and fix the signal when the data looks off. |
+| taste | Audience 1: the Qloo affinities table with scores, then demographics and places. | So every audience is measured, not guessed. These are the things this group really loves, with Qloo's scores. Without Qloo, this would just be an AI making things up. |
+| targeting | The Meta Ads interests block; Copy is pressed. | It becomes targeting you can paste straight into Facebook and Reddit ads. |
+| ads | The highlighted "Ad kit" menu entry, then the first concept's feed and story mockups. | Then the part nobody else does: ads, written for each audience's taste. Three concepts each, in feed and story formats, ready to run. |
+| evidence | The Qloo entities under the concept, with their scores. | Every ad shows the Qloo taste it was built on. |
+| critic | The creative agents' log: the critic rejects "Made from trees, not petroleum" as greenwashing. | And a critic agent sends back anything that overpromises, stereotypes, or cites data Qloo doesn't have. |
+| close | Logo, "Your audiences. And their ads.", whowouldlove.javi.link. | Who Would Love. Who'd love what you made, and the ads to reach them. |
 
 ## Upload checklist
 
-- [ ] YouTube, visibility **Public**, title "Who Would Love: find who would love what you made (Qloo Agentic Hackathon)".
+- [ ] YouTube, visibility **Public**, title "Who Would Love: your audiences, and their ads (Qloo Agentic Hackathon)".
 - [ ] Custom thumbnail `video-thumbnail.png`.
 - [ ] Upload `who-would-love-demo.srt` as English captions.
 - [ ] Paste the YouTube link in the Devpost "Video demo link" field.
