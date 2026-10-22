@@ -192,13 +192,14 @@ export function renderReport(input: {
     <button type="button" aria-pressed="false" data-f="o"><i style="background:var(--ours)"></i>Our interpretation</button>
   </div>
 </div>
-<div class="wrap"><nav class="toc" id="toc" aria-label="Sections">${nav.map((x) => `<a href="#${x.id}"${x.hot ? ' class="hot"' : ""}>${x.hot ? "✦ " : ""}${x.label}</a>`).join("")}</nav></div>
+<div class="wrap tocwrap"><button type="button" class="tocbtn" id="tocL" aria-label="Earlier sections" hidden>‹</button><nav class="toc" id="toc" aria-label="Sections">${nav.map((x) => `<a href="#${x.id}"${x.hot ? ' class="hot"' : ""}>${x.hot ? "✦ " : ""}${x.label}</a>`).join("")}</nav><button type="button" class="tocbtn" id="tocR" aria-label="Later sections" hidden>›</button></div>
 </div>
 <main><div class="wrap">
 ${sections.join("\n")}
 <p class="empty" id="empty">Nothing from this source in the report.</p>
 <footer><span>Who Would Love · Taste data by Qloo</span><span>Report ${esc(id)}</span></footer>
 </div></main>
+<button type="button" class="totop" id="totop" aria-label="Back to top">↑</button>
 <script>
 const btns=[...document.querySelectorAll('.seg button')];
 btns.forEach(b=>b.addEventListener('click',()=>{
@@ -228,6 +229,15 @@ function spy(){
   if(on)toc.scrollTo({left:on.offsetLeft-toc.clientWidth/2+on.offsetWidth/2,behavior:'smooth'});
 }
 addEventListener('scroll',spy,{passive:true});spy();
+// Faded edges and arrows when the menu has more sections to either side.
+const tl=document.getElementById('tocL'),tr=document.getElementById('tocR');
+function edges(){const l=toc.scrollLeft>4,r=toc.scrollLeft+toc.clientWidth<toc.scrollWidth-4;toc.classList.toggle('fl',l);toc.classList.toggle('fr',r);tl.hidden=!l;tr.hidden=!r;}
+toc.addEventListener('scroll',edges,{passive:true});addEventListener('resize',edges);edges();
+tl.onclick=()=>toc.scrollBy({left:-toc.clientWidth*.6,behavior:'smooth'});
+tr.onclick=()=>toc.scrollBy({left:toc.clientWidth*.6,behavior:'smooth'});
+const toTop=document.getElementById('totop');
+addEventListener('scroll',()=>toTop.classList.toggle('show',scrollY>700),{passive:true});
+toTop.onclick=()=>scrollTo({top:0,behavior:'smooth'});
 btns.forEach(b=>b.addEventListener('click',()=>{links.forEach(a=>{const s=document.getElementById(a.getAttribute('href').slice(1));a.classList.toggle('off',!s||s.classList.contains('hidden'))});spy();}));
 function copy(btn){
   const t=btn.previousElementSibling.textContent;
@@ -282,8 +292,19 @@ main{padding:24px 0 80px}
 .toc a{flex:none;font-size:13.5px;color:var(--ink-2);text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s}
 .toc a:hover{background:#ebe7ee;color:var(--ink)}
 .toc a.on{background:var(--ink);color:#fff}
-.toc a.hot{background:var(--accent);color:#fff;font-weight:600}
-.toc a.hot.on{background:var(--accent-2);box-shadow:0 0 0 3px rgba(255,106,61,.25)}
+.toc a.hot{color:var(--accent-2);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--accent)}
+.toc a.hot.on{background:var(--accent);color:#fff;box-shadow:0 0 0 3px rgba(255,106,61,.25)}
+.bar .tocwrap{justify-content:flex-start;gap:6px;align-items:center;padding-top:0}
+.tocwrap .toc{flex:1;min-width:0;margin-top:0;padding:4px 2px 4px}
+.toc.fr{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 48px),transparent)}
+.toc.fl{-webkit-mask-image:linear-gradient(90deg,transparent,#000 48px);mask-image:linear-gradient(90deg,transparent,#000 48px)}
+.toc.fl.fr{-webkit-mask-image:linear-gradient(90deg,transparent,#000 48px,#000 calc(100% - 48px),transparent);mask-image:linear-gradient(90deg,transparent,#000 48px,#000 calc(100% - 48px),transparent)}
+.tocbtn{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:18px;line-height:1;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 8px -3px rgba(21,18,27,.25)}
+.tocbtn[hidden]{display:none}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.totop{position:fixed;right:22px;bottom:22px;z-index:20;width:46px;height:46px;border-radius:50%;background:var(--ink);color:#fff;border:0;font-size:20px;cursor:pointer;box-shadow:0 10px 24px -10px rgba(21,18,27,.6);opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .25s,transform .25s}
+.totop.show{opacity:1;transform:none;pointer-events:auto}
 .toc a.off{display:none}
 .adcall{display:flex;align-items:center;gap:16px;text-decoration:none;color:#fff;background:linear-gradient(120deg,#15121b,#3a1f3f 60%,#e2552d);border-radius:20px;padding:20px 24px;transition:transform .2s}
 .adcall:hover{transform:translateY(-2px)}
@@ -373,6 +394,8 @@ footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;paddin
   .seg::-webkit-scrollbar{display:none}
   .seg button{flex:none;padding:7px 11px;font-size:13px}
   .toc{padding-bottom:6px}
+  .tocbtn{display:none!important}
+  .totop{right:14px;bottom:14px}
   .adcall{flex-wrap:wrap}.adcall i{margin-left:0}
 }
 @media print{.bar{display:none}body{background:#fff}.box{break-inside:avoid}}
