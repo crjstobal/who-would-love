@@ -163,7 +163,7 @@ export function renderReport(input: {
 <header class="cover">
   <div class="mesh"><i></i><i></i><i></i></div>
   <div class="wrap">
-    <div class="top"><div class="logo">${LOGO}Who Would Love</div><span>Audience report · ${esc(date)}</span></div>
+    <div class="top"><a class="logo" href="/">${LOGO}Who Would Love</a><span><a href="/reports">Sample reports</a> · Audience report · ${esc(date)}</span></div>
     <div class="app">${icon}<div>
       <div class="eyebrow">Audience report for</div>
       <h1>${esc(profile.name)}</h1>
@@ -227,6 +227,7 @@ a{color:var(--web);text-underline-offset:3px}
 .mesh i:nth-child(3){width:16%;height:30%;right:30%;top:-10%;background:#f2a33a;opacity:.3}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px;color:rgba(255,255,255,.7)}
 .logo{font-family:var(--display);font-weight:600;font-size:23px;letter-spacing:-.025em;display:flex;align-items:center;gap:10px;color:#fff}
+a.logo{text-decoration:none}.top span a{color:#fff}
 .logo svg{width:30px;height:36px;color:#fff}
 .app{display:flex;gap:24px;align-items:center;margin-top:56px}
 .app img,.mono-icon{width:104px;height:104px;border-radius:24px;box-shadow:0 20px 40px -16px rgba(0,0,0,.7);flex:none;object-fit:contain;background:#000}

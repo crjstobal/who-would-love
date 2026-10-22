@@ -204,10 +204,31 @@ async function reportHtml(id: string, env: Env) {
   return new Response(row.html, { headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=300" } });
 }
 
+// The gallery on /reports: reports we chose to show (featured > 0, in that order). The card details are
+// read back from each report's HTML, so the gallery never needs its own copy of the data.
+const unescape = (s: string) => s.replace(/<[^>]+>/g, "").replace(/&(amp|lt|gt|quot|#39);/g, (_, e) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[e as string]!).trim();
+
+async function samples(env: Env) {
+  const { results } = await env.DB.prepare("SELECT id, url, product_name, html, created_at FROM reports WHERE featured>0 AND status='done' ORDER BY featured")
+    .all<{ id: string; url: string; product_name: string; html: string; created_at: number }>();
+  const cards = results.map((r) => ({
+    id: r.id,
+    name: r.product_name,
+    host: new URL(r.url).hostname.replace(/^www\./, ""),
+    date: new Date(r.created_at).toISOString().slice(0, 10),
+    icon: r.html.match(/<div class="app"><img src="([^"]+)"/)?.[1] ?? null,
+    summary: unescape(r.html.match(/<p class="lead">([\s\S]*?)<\/p>/)?.[1] ?? ""),
+    audiences: [...r.html.matchAll(/<section class="sec audience">[\s\S]*?<h2>([\s\S]*?)<\/h2>/g)].map((m) => unescape(m[1])),
+    agent: r.html.includes("How the agent investigated"),
+  }));
+  return Response.json(cards, { headers: { "Cache-Control": "public, max-age=300" } });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const { pathname } = new URL(request.url);
     if (pathname === "/api/config") return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY, steps: STEPS });
+    if (pathname === "/api/samples") return samples(env);
     if (pathname === "/api/reports" && request.method === "POST") return createReport(request, env);
     const m = pathname.match(/^\/api\/reports\/([a-z0-9-]{3,40})(\/html)?$/);
     if (m && request.method === "GET") return m[2] ? reportHtml(m[1], env) : reportStatus(m[1], env);

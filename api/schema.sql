@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS reports (
   html TEXT,
   cost_usd REAL NOT NULL DEFAULT 0,
   ip_hash TEXT,
+  featured INTEGER NOT NULL DEFAULT 0, -- > 0: shown in the /reports gallery, in this order
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL
 );
