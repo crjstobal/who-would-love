@@ -244,6 +244,7 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(36px,6vw,72px);let
 main{padding:24px 0 80px}
 .sec{display:grid;grid-template-columns:260px 1fr;gap:40px;padding:48px 0;border-bottom:1px solid var(--line)}
 .sec.hidden{display:none}
+@media (min-width:861px){.side{position:sticky;top:92px;align-self:start}}
 .side .num{font-family:var(--mono);font-size:13px;color:var(--accent-2)}
 .side h2{font-family:var(--display);font-weight:600;font-size:30px;letter-spacing:-.03em;line-height:1.08;margin-top:8px}
 .side p{color:var(--ink-2);font-size:15px;margin-top:10px}
