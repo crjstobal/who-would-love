@@ -29,6 +29,7 @@ export interface Env {
   DAILY_CAP: string;
   PER_IP_DAILY_CAP: string;
   PUBLIC_FROM: string;
+  JUDGE_DAILY_CAP: string;
 }
 
 type Params = { id: string; url: string; scope: "page" | "site" };
@@ -203,22 +204,38 @@ async function createReport(request: Request, env: Env) {
     .bind(url, scope, Date.now() - 30 * DAY, Date.now() - DAY).first<{ id: string }>();
   if (recent) return json({ id: recent.id, reused: true });
 
-  const ipHash = await sha256(`${env.IP_SALT}:${ip}`);
-  // Judges get unrestricted access (a rules requirement) with the code from the testing instructions.
+  // Judges use the link from the Devpost page (it carries the code). Their reports are marked, so they
+  // have their own daily cap and never use up the public one, and the public never uses up theirs.
   const judge = !!env.JUDGE_CODE && body.code === env.JUDGE_CODE;
+  const ipHash = (judge ? "judge:" : "") + await sha256(`${env.IP_SALT}:${ip}`);
   const since = Date.now() - DAY;
-  const counts = await env.DB.prepare("SELECT COUNT(*) AS total, SUM(CASE WHEN ip_hash=? THEN 1 ELSE 0 END) AS mine FROM reports WHERE created_at>?")
-    .bind(ipHash, since).first<{ total: number; mine: number | null }>();
-  // Before PUBLIC_FROM only judges can start new reports; saved reports stay open to everyone.
-  if (!judge && Date.now() < Date.parse(env.PUBLIC_FROM)) return json({ error: "New reports open to the public on November 1, 2026. In the meantime, open the sample report to see what you get." }, 403);
-  if (!judge && (counts?.mine ?? 0) >= Number(env.PER_IP_DAILY_CAP)) return json({ error: "You have used today's free reports. Come back tomorrow, or open the sample report in the meantime." }, 429);
-  if (!judge && (counts?.total ?? 0) >= Number(env.DAILY_CAP)) return json({ error: "We have hit today's limit of free reports (each one runs real AI and data queries). Please try again tomorrow, or open the sample report." }, 429);
+  const counts = await env.DB.prepare(`SELECT
+      SUM(CASE WHEN ip_hash LIKE 'judge:%' THEN 1 ELSE 0 END) AS judges,
+      SUM(CASE WHEN ip_hash NOT LIKE 'judge:%' AND ip_hash <> 'owner-test' THEN 1 ELSE 0 END) AS total,
+      SUM(CASE WHEN ip_hash=? THEN 1 ELSE 0 END) AS mine
+    FROM reports WHERE created_at>?`).bind(ipHash, since).first<{ judges: number | null; total: number | null; mine: number | null }>();
+  const JUDGES = " Judging the Qloo Agentic Hackathon? Use the judges' link on our Devpost page.";
+  if (judge) {
+    if ((counts?.judges ?? 0) >= Number(env.JUDGE_DAILY_CAP)) return json({ error: "Today's judging reports are used up. Please try again tomorrow, or open the sample reports." }, 429);
+  } else {
+    // Before PUBLIC_FROM only judges can start new reports; saved reports stay open to everyone.
+    if (Date.now() < Date.parse(env.PUBLIC_FROM)) return json({ error: "New reports open to the public on November 1, 2026. In the meantime, see the sample reports." + JUDGES }, 403);
+    if ((counts?.mine ?? 0) >= Number(env.PER_IP_DAILY_CAP)) return json({ error: "You have used today's free report. Come back tomorrow, or see the sample reports." + JUDGES }, 429);
+    if ((counts?.total ?? 0) >= Number(env.DAILY_CAP)) return json({ error: "We have hit today's limit of free reports (each one runs real AI and data queries). Please try again tomorrow, or see the sample reports." + JUDGES }, 429);
+  }
 
   const id = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
   const now = Date.now();
   await env.DB.prepare("INSERT INTO reports (id, url, scope, status, step, ip_hash, created_at, updated_at) VALUES (?, ?, ?, 'queued', 0, ?, ?, ?)")
     .bind(id, url, scope, ipHash, now, now).run();
-  await env.REPORT.create({ id, params: { id, url, scope } });
+  try {
+    await env.REPORT.create({ id, params: { id, url, scope } });
+  } catch (e) {
+    // Never leave a report queued forever: a stuck row would also be reused for this link for a day.
+    await env.DB.prepare("UPDATE reports SET status='failed', error=?, updated_at=? WHERE id=?")
+      .bind("We could not start this report. Please try again in a minute.", Date.now(), id).run();
+    return json({ error: "We could not start this report. Please try again in a minute." }, 503);
+  }
   return json({ id });
 }
 

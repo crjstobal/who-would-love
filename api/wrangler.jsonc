@@ -18,6 +18,8 @@
     "PER_IP_DAILY_CAP": "1",
     // Until this moment only judges (with their code) can start new reports.
     "PUBLIC_FROM": "2026-11-01T00:00:00Z",
+    // Reports a day started with the judges' code (the link on the Devpost page).
+    "JUDGE_DAILY_CAP": "30",
     "TURNSTILE_SITE_KEY": "REPLACE_ME"
   }
   // Secrets (set with `wrangler secret put`, loaded from AWS SSM by scripts/deploy.sh):
