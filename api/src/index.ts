@@ -26,8 +26,8 @@ export interface Env {
   TURNSTILE_SITE_KEY: string;
   IP_SALT: string;
   JUDGE_CODE?: string;
-  DAILY_CAP: string;
-  PER_IP_DAILY_CAP: string;
+  PUBLIC_CAP: string;
+  PUBLIC_WINDOW_DAYS: string;
   PUBLIC_FROM: string;
   JUDGE_DAILY_CAP: string;
 }
@@ -208,20 +208,19 @@ async function createReport(request: Request, env: Env) {
   // have their own daily cap and never use up the public one, and the public never uses up theirs.
   const judge = !!env.JUDGE_CODE && body.code === env.JUDGE_CODE;
   const ipHash = (judge ? "judge:" : "") + await sha256(`${env.IP_SALT}:${ip}`);
-  const since = Date.now() - DAY;
   const counts = await env.DB.prepare(`SELECT
-      SUM(CASE WHEN ip_hash LIKE 'judge:%' THEN 1 ELSE 0 END) AS judges,
-      SUM(CASE WHEN ip_hash NOT LIKE 'judge:%' AND ip_hash <> 'owner-test' THEN 1 ELSE 0 END) AS total,
-      SUM(CASE WHEN ip_hash=? THEN 1 ELSE 0 END) AS mine
-    FROM reports WHERE created_at>?`).bind(ipHash, since).first<{ judges: number | null; total: number | null; mine: number | null }>();
-  const JUDGES = " Judging the Qloo Agentic Hackathon? Use the judges' link on our Devpost page.";
+      SUM(CASE WHEN ip_hash LIKE 'judge:%' AND created_at>?1 THEN 1 ELSE 0 END) AS judges,
+      SUM(CASE WHEN ip_hash NOT LIKE 'judge:%' AND ip_hash <> 'owner-test' AND created_at>?2 THEN 1 ELSE 0 END) AS public
+    FROM reports WHERE created_at>?2`).bind(Date.now() - DAY, Date.now() - Number(env.PUBLIC_WINDOW_DAYS) * DAY)
+    .first<{ judges: number | null; public: number | null }>();
+  // Shown as two paragraphs on the home page.
+  const JUDGES = "\n\nAre you a judge? Use the special judges' link on our Devpost page.";
   if (judge) {
-    if ((counts?.judges ?? 0) >= Number(env.JUDGE_DAILY_CAP)) return json({ error: "Today's judging reports are used up. Please try again tomorrow, or open the sample reports." }, 429);
+    if ((counts?.judges ?? 0) >= Number(env.JUDGE_DAILY_CAP)) return json({ error: "Today's judging reports are used up. Please try again tomorrow, or read the finished reports on the sample reports page." }, 429);
   } else {
     // Before PUBLIC_FROM only judges can start new reports; saved reports stay open to everyone.
-    if (Date.now() < Date.parse(env.PUBLIC_FROM)) return json({ error: "New reports open to the public on November 1, 2026. In the meantime, see the sample reports." + JUDGES }, 403);
-    if ((counts?.mine ?? 0) >= Number(env.PER_IP_DAILY_CAP)) return json({ error: "You have used today's free report. Come back tomorrow, or see the sample reports." + JUDGES }, 429);
-    if ((counts?.total ?? 0) >= Number(env.DAILY_CAP)) return json({ error: "We have hit today's limit of free reports (each one runs real AI and data queries). Please try again tomorrow, or see the sample reports." + JUDGES }, 429);
+    if (Date.now() < Date.parse(env.PUBLIC_FROM)) return json({ error: "New reports open to the public on November 1, 2026. Until then, you can read every finished report on the sample reports page." + JUDGES }, 403);
+    if ((counts?.public ?? 0) >= Number(env.PUBLIC_CAP)) return json({ error: `To keep API costs under control, the public can start one new report every ${env.PUBLIC_WINDOW_DAYS} days, and this one is taken. You can still read every finished report on the sample reports page.` + JUDGES }, 429);
   }
 
   const id = crypto.randomUUID().replace(/-/g, "").slice(0, 12);

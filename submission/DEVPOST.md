@@ -240,7 +240,7 @@ AWS SSM (`/servikaki/secrets/whowouldlove.env`, `JUDGE_CODE`) and is never commi
 
 1. Open **https://whowouldlove.javi.link/?code=JUDGE_CODE_HERE** (the judges' link). It lets you
    start reports at any time, up to 30 a day across all judges, and is remembered on that device.
-   Without it, new reports open to the public on 2026-11-01 with a small daily limit.
+   Without it, the public can start one new report every five days from 2026-11-01.
 2. Paste a link to a product page (an App Store listing, a Steam page, a shop or landing page) and
    press "Find who would love it". Choose "the whole website" for a home page.
 3. Watch the progress page: you will see the taste agents' steps live. The report opens after about

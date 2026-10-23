@@ -14,8 +14,9 @@
     { "binding": "DB", "database_name": "who-would-love", "database_id": "0a65bc05-38db-46b1-9ea2-7d9023ea3279" }
   ],
   "vars": {
-    "DAILY_CAP": "3",
-    "PER_IP_DAILY_CAP": "1",
+    // The public can start PUBLIC_CAP new reports every PUBLIC_WINDOW_DAYS days, all visitors together.
+    "PUBLIC_CAP": "1",
+    "PUBLIC_WINDOW_DAYS": "5",
     // Until this moment only judges (with their code) can start new reports.
     "PUBLIC_FROM": "2026-11-01T00:00:00Z",
     // Reports a day started with the judges' code (the link on the Devpost page).

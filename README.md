@@ -91,7 +91,7 @@ browser ── whowouldlove.javi.link (Cloudflare Pages: web/)
 - Reports keep their inputs in D1 (`data`), so an ad kit or a re-render never needs a new run.
 - The API has no public URL; only the website reaches it, through a service binding.
 - Until 2026-11-01 (UTC) only judges can start new reports; saved reports and the sample stay public.
-- Abuse and cost limits: 1 report per IP per day and 3 per day in total for the public. Judges use
+- Abuse and cost limits: the public can start 1 new report every 5 days, all visitors together. Judges use
   the link on the Devpost page, which carries a code with its own cap (30 reports a day) that never
   competes with the public one. A finished report for the same link is reused for 30 days.
 
