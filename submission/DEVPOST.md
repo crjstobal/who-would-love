@@ -232,8 +232,15 @@ lives only on the server.
 
 ## Testing instructions (for judges)
 
-1. Open **https://whowouldlove.javi.link/?code=JUDGE_CODE_HERE**. The code lifts every limit on this
-   device. (Without it, new reports open to the public on 2026-11-01 with a small daily limit.)
+This hackathon's form has no private field for judges, so this section goes at the end of the
+public description, and the judges' link also goes in "Try it out links". The real code lives in
+AWS SSM (`/servikaki/secrets/whowouldlove.env`, `JUDGE_CODE`) and is never committed here.
+
+### For judges: try it
+
+1. Open **https://whowouldlove.javi.link/?code=JUDGE_CODE_HERE** (the judges' link). It lets you
+   start reports at any time, up to 30 a day across all judges, and is remembered on that device.
+   Without it, new reports open to the public on 2026-11-01 with a small daily limit.
 2. Paste a link to a product page (an App Store listing, a Steam page, a shop or landing page) and
    press "Find who would love it". Choose "the whole website" for a home page.
 3. Watch the progress page: you will see the taste agents' steps live. The report opens after about
